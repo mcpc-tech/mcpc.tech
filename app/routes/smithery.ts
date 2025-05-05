@@ -29,9 +29,14 @@ export interface ServerDetailResponse {
   deploymentUrl: string | null;
   configSchema: unknown; // JSONSchema
   connections: Array<{
-    type: string;
+    type: "stdio" | "http" | "ws";
     url?: string;
+    deploymentUrl?: string;
     configSchema: unknown; // JSONSchema
+    config: unknown; // JSONSchema
+    exampleConfig?: unknown;
+    published?: boolean;
+    stdioFunction?: string;
   }>;
   security: {
     scanPassed: boolean;

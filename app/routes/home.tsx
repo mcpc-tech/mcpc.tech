@@ -2,12 +2,23 @@ import { Link } from "@heroui/link";
 import { useFetcher, type MetaFunction } from "react-router";
 import { subtitle, title } from "~/components/primitives";
 import { Navbar } from "~/components/navbar";
-import { Accordion, AccordionItem, Button } from "@heroui/react";
-import { useRef, useEffect, useState } from "react";
+import {
+  Accordion,
+  AccordionItem,
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "@heroui/react";
+import React, { useRef, useEffect, useState } from "react";
 import { SuggestionDataItem } from "react-mentions";
 import { ServerDetailResponse, ServerListResponse } from "~/routes/smithery";
 import { Mention } from "primereact/mention";
 import { PrimeReactProvider } from "primereact/api";
+import { CodeBlock } from "~/components/code";
+import { JSONSchemaFaker } from "json-schema-faker";
 
 export function HydrateFallback() {
   return <div>Loading...</div>;
@@ -54,6 +65,8 @@ export default function Index() {
     new Set<string>()
   );
   const [selectedToolName, setSelectedToolName] = useState<string>();
+  const [isShowResult, setIsShowResult] = useState(false);
+  const [mcpcConfig, setMcpcConfig] = useState<any>({});
 
   const [serverDeps, setServerDeps] = useState<ServerListResponse["servers"]>(
     []
@@ -107,6 +120,7 @@ export default function Index() {
                   onClick={() => {
                     setSelectedToolName(tool.name);
                     mcpSuggestion.resolvedToolDef = `${mcpSuggestion.qualifiedName}.${tool.name}`;
+                    // TODO: bug->not delete old deps when change tool/remove tool
                     setServerDeps((deps) => [
                       ...deps,
                       { ...mcpSuggestion, detail: detailFetcher.data },
@@ -126,6 +140,54 @@ export default function Index() {
         </AccordionItem>
       </Accordion>
     );
+  };
+
+  const handleSubmit = () => {
+    setIsShowResult(true);
+    const depsConfg = {
+      // @ts-ignore
+      mcpServers: {} as Record<string, any>,
+    };
+    serverDeps.forEach(({ detail, qualifiedName }) => {
+      const stdio = detail?.connections.find((v) => v.type === "stdio");
+      const remote = detail?.connections.find((v) => v.type === "http");
+
+      if (stdio) {
+        depsConfg.mcpServers[qualifiedName] = eval(stdio.stdioFunction ?? "")?.(
+          stdio?.exampleConfig ?? {}
+        );
+      } else if (remote) {
+        // Faking a config
+        remote.config = JSONSchemaFaker.generate(remote.configSchema as any);
+        Reflect.deleteProperty(remote, "configSchema");
+        depsConfg.mcpServers[qualifiedName] = {
+          smitheryConfig: remote,
+        };
+      }
+    });
+    const configRaw = JSON.stringify([
+      {
+        name: `your-tool-name`,
+        description: resolvedValue,
+        deps: depsConfg,
+      },
+    ]);
+    const config = {
+      mcpServers: {
+        "your-server-name": {
+          command: "npx",
+          args: [
+            "-y",
+            "deno",
+            "run",
+            "--allow-all",
+            "jsr:@mcpc/core/bin",
+            `--mcpc-config=${configRaw}`,
+          ],
+        },
+      },
+    };
+    setMcpcConfig(config);
   };
 
   useEffect(() => {
@@ -148,8 +210,7 @@ export default function Index() {
           </span>
           <span className={title()}>with a Single Prompt.</span>
           <div className={subtitle({ class: "mt-4" })}>
-            Powered by the composition of thousands of underlying MCPs, Try it
-            out below.
+            Powered by the composition of thousands of MCPs, Try it out below.
           </div>
         </div>
 
@@ -159,7 +220,7 @@ export default function Index() {
           inputRef={textareaRef}
           onChange={(e) => {
             const { value } = e.target as HTMLInputElement;
-            setValue(value?.replaceAll(/>([^\s]+)/g, "$1"));
+            setValue(value);
             setResolvedValue(
               value?.replaceAll(/>([^\s]+)/g, '<tool name="$1"/>')
             );
@@ -185,10 +246,53 @@ export default function Index() {
           className="min-h-24 z-50"
         />
 
-        <Button className="mt-8" color="primary" variant="bordered">
+        <Button
+          className="mt-8"
+          onPress={handleSubmit}
+          color="primary"
+          variant="bordered"
+        >
           Create Your MCP Server
         </Button>
       </section>
+
+      <Modal
+        isOpen={isShowResult}
+        size={"full"}
+        onClose={() => {
+          setIsShowResult(false);
+        }}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Your MCP Server is Ready, Config:
+              </ModalHeader>
+              <ModalBody>
+                <CodeBlock
+                  code={JSON.stringify(mcpcConfig, null, 2)}
+                  language={"json"}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button
+                  color="primary"
+                  onPress={() => {
+                    onClose();
+                    navigator.clipboard.writeText(JSON.stringify(mcpcConfig));
+                  }}
+                >
+                  Copy Config
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </IndexLayout>
   );
 }
