@@ -1,25 +1,17 @@
 import { Link } from "@heroui/link";
-import type { MetaFunction } from "react-router";
-import { subtitle, title } from "components/primitives";
-import { Navbar } from "components/navbar";
-import {
-  Button,
-  Listbox,
-  ListboxItem,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@heroui/react";
-import { useRef, useEffect } from "react";
-import { MCP_TOOLS } from "~/constants";
+import { useFetcher, type MetaFunction } from "react-router";
+import { subtitle, title } from "~/components/primitives";
+import { Navbar } from "~/components/navbar";
+import { Accordion, AccordionItem, Button } from "@heroui/react";
+import { useRef, useEffect, useState, useLayoutEffect } from "react";
+import { SuggestionDataItem } from "react-mentions";
+import { ServerListResponse } from "~/routes/smithery";
+import { Mention } from "primereact/mention";
+import { PrimeReactProvider } from "primereact/api";
 
-const mcpServers = Object.keys(MCP_TOOLS).map((key) => {
-  return {
-    id: key,
-    name: key,
-    description: key,
-  };
-});
+export function HydrateFallback() {
+  return <div>Loading...</div>;
+}
 
 export const meta: MetaFunction = () => {
   return [
@@ -28,12 +20,12 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export function IndexLayout({ children }: React.PropsWithChildren) {
+export function IndexLayout({ children }: React.PropsWithChildren<unknown>) {
   return (
     <div className="relative flex flex-col h-screen">
       <Navbar />
-      <main className="container mx-auto max-w-8xl pt-16 px-6 flex-grow">
-        {children}
+      <main className="container mx-auto max-w-8xl pt-16 px-6 flex-grow flex items-center justify-center">
+        <PrimeReactProvider>{children}</PrimeReactProvider>
       </main>
       <footer className="w-full flex items-center justify-center py-3">
         <Link
@@ -51,26 +43,112 @@ export function IndexLayout({ children }: React.PropsWithChildren) {
 }
 
 export default function Index() {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fetcher = useFetcher();
+  const detailFetcher = useFetcher();
+  const { servers } = (fetcher?.data as unknown as ServerListResponse) ?? {
+    servers: [{ qualifiedName: "111111111" }, { qualifiedName: "22222222" }],
+  };
+  const [value, setValue] = useState("");
+  const [selectedKeys, setSelectedKeys] = useState(new Set(["1"]));
+  const textareaRef = useRef<HTMLInputElement>(null);
+  const mentionRef = useRef<Mention>(null);
+
+  console.log({ servers, value, fetcher, detailFetcher, selectedKeys });
+
+  const renderSuggestion = (
+    suggestion: SuggestionDataItem
+  ): React.ReactNode => {
+    const mcpSuggestion =
+      suggestion as unknown as ServerListResponse["servers"][number];
+
+    return (
+      <Accordion
+        selectedKeys={selectedKeys}
+        onSelectionChange={() => {
+          detailFetcher.submit(
+            { server: mcpSuggestion.qualifiedName },
+            { action: "/smithery", method: "GET" }
+          );
+        }}
+        variant="shadow"
+      >
+        <AccordionItem
+          key={mcpSuggestion.qualifiedName}
+          aria-label={mcpSuggestion.qualifiedName}
+          subtitle={mcpSuggestion.description}
+          title={mcpSuggestion.qualifiedName}
+        >
+          {detailFetcher.data && (
+            <div>{JSON.stringify(detailFetcher.data)}</div>
+          )}
+        </AccordionItem>
+      </Accordion>
+    );
+  };
+  // const templateString = `<tool name="__id__"/>`;
 
   useEffect(() => {
     textareaRef.current?.focus();
   }, [textareaRef]);
 
+  useLayoutEffect(() => {
+    const highlighters = document.querySelectorAll(
+      ".w-full__highlighter strong"
+    );
+    highlighters.forEach((highlighter) => {
+      highlighter.classList.add("border");
+      highlighter.classList.add("border-gray-300");
+      highlighter.classList.add("rounded-lg");
+      highlighter.classList.add("focus:outline-none");
+      highlighter.classList.add("focus:ring-2");
+      highlighter.classList.add("focus:ring-primary");
+      highlighter.classList.add("bg-red-200");
+    });
+  }, [value]);
+
+  useEffect(() => {
+    if (fetcher.state === "idle" && fetcher.data == null) {
+      fetcher.load("/smithery");
+    }
+  }, [fetcher]);
+
   return (
     <IndexLayout>
-      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-        <div className="inline-block max-w-xl text-center justify-center">
+      <section className="flex flex-col w-6/12 justify-center gap-4 py-8 md:py-10">
+        <div className="inline-block max-w-7xl text-center justify-center">
           <span className={title()}>Create Your </span>
-          <span className={title({ color: "violet" })}>
-            Agentic MCP Server{" "}
-          </span>
+          <span className={title({ color: "violet" })}>Agentic MCP Server</span>
           <span className={title()}>with a Single Prompt.</span>
           <div className={subtitle({ class: "mt-4" })}>
             Powered by the composition of thousands of underlying MCPs, Try it
             out below.
           </div>
         </div>
+
+        <Mention
+          // unstyled
+          inputRef={textareaRef}
+          onChange={(e) => setValue(e.target.value)}
+          onSearch={(e) => {
+            fetcher.submit(
+              {
+                q: `${encodeURIComponent(e.query)}`,
+              },
+              { action: "/smithery", method: "GET" }
+            );
+          }}
+          ref={mentionRef}
+          trigger="@"
+          suggestions={servers.map((server) => ({
+            ...server,
+            id: server.qualifiedName,
+          }))}
+          placeholder="Enter @ to mention people"
+          itemTemplate={renderSuggestion}
+          inputClassName="w-full min-h-24 z-0"
+          panelClassName="w-8/12 min-h-24 z-50"
+          className="min-h-24 z-50"
+        />
 
         <Button className="mt-8" color="primary" variant="bordered">
           Create MCP

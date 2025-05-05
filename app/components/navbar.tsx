@@ -13,8 +13,8 @@ import { Input } from "@heroui/input";
 import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
 
-import { GithubIcon, SearchIcon } from "components/icons";
-import { siteConfig } from "config/site";
+import { GithubIcon, SearchIcon } from "~/components/icons";
+import { siteConfig } from "~/config/site";
 import { useEffect, useState } from "react";
 import { ThemeSwitch } from "./theme-switch";
 
