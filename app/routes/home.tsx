@@ -3,9 +3,9 @@ import { useFetcher, type MetaFunction } from "react-router";
 import { subtitle, title } from "~/components/primitives";
 import { Navbar } from "~/components/navbar";
 import { Accordion, AccordionItem, Button } from "@heroui/react";
-import { useRef, useEffect, useState, useLayoutEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { SuggestionDataItem } from "react-mentions";
-import { ServerListResponse } from "~/routes/smithery";
+import { ServerDetailResponse, ServerListResponse } from "~/routes/smithery";
 import { Mention } from "primereact/mention";
 import { PrimeReactProvider } from "primereact/api";
 
@@ -46,25 +46,45 @@ export default function Index() {
   const fetcher = useFetcher();
   const detailFetcher = useFetcher();
   const { servers } = (fetcher?.data as unknown as ServerListResponse) ?? {
-    servers: [{ qualifiedName: "111111111" }, { qualifiedName: "22222222" }],
+    servers: [],
   };
   const [value, setValue] = useState("");
-  const [selectedKeys, setSelectedKeys] = useState(new Set(["1"]));
+  const [resolvedValue, setResolvedValue] = useState("");
+  const [selectedServerNames, setSelectedServerNames] = useState(
+    new Set<string>()
+  );
+  const [selectedToolName, setSelectedToolName] = useState<string>();
+
+  const [serverDeps, setServerDeps] = useState<ServerListResponse["servers"]>(
+    []
+  );
   const textareaRef = useRef<HTMLInputElement>(null);
   const mentionRef = useRef<Mention>(null);
 
-  console.log({ servers, value, fetcher, detailFetcher, selectedKeys });
+  console.log({
+    servers,
+    value,
+    fetcher,
+    detailFetcher,
+    selectedServerNames,
+    selectedToolName,
+    resolvedValue,
+    serverDeps,
+  });
 
   const renderSuggestion = (
     suggestion: SuggestionDataItem
   ): React.ReactNode => {
     const mcpSuggestion =
       suggestion as unknown as ServerListResponse["servers"][number];
+    const tools = detailFetcher.data?.tools as ServerDetailResponse["tools"];
 
     return (
       <Accordion
-        selectedKeys={selectedKeys}
-        onSelectionChange={() => {
+        className="rounded-none m-1"
+        selectedKeys={selectedServerNames}
+        onSelectionChange={(keys) => {
+          setSelectedServerNames(new Set(keys as string));
           detailFetcher.submit(
             { server: mcpSuggestion.qualifiedName },
             { action: "/smithery", method: "GET" }
@@ -77,34 +97,66 @@ export default function Index() {
           aria-label={mcpSuggestion.qualifiedName}
           subtitle={mcpSuggestion.description}
           title={mcpSuggestion.qualifiedName}
+          className="rounded-lg w-full"
         >
-          {detailFetcher.data && (
-            <div>{JSON.stringify(detailFetcher.data)}</div>
+          {tools && (
+            <div className="w-full list-disc list-inside py-1 px-2">
+              {tools.map((tool) => (
+                <button
+                  key={tool.name}
+                  onClick={() => {
+                    setSelectedToolName(tool.name);
+                    mcpSuggestion.resolvedToolDef = `${mcpSuggestion.qualifiedName}.${tool.name}`;
+                    setServerDeps((deps) => [
+                      ...deps,
+                      { ...mcpSuggestion, detail: detailFetcher.data },
+                    ]);
+                    mentionRef.current?.hide();
+                  }}
+                  className="w-full text-left block px-4 py-2 rounded-md text-default-600 hover:text-primary hover:bg-default-100 transition-all duration-200 ease-in-out"
+                >
+                  <div className="w-full font-medium">{tool.name}</div>
+                  <div className="w-full ml-6 mt-1 text-sm text-gray-500">
+                    {tool.description}
+                  </div>
+                </button>
+              ))}
+            </div>
           )}
         </AccordionItem>
       </Accordion>
     );
   };
-  // const templateString = `<tool name="__id__"/>`;
 
   useEffect(() => {
-    textareaRef.current?.focus();
-  }, [textareaRef]);
+    mentionRef.current?.focus();
+  }, [mentionRef]);
 
-  useLayoutEffect(() => {
-    const highlighters = document.querySelectorAll(
-      ".w-full__highlighter strong"
-    );
-    highlighters.forEach((highlighter) => {
-      highlighter.classList.add("border");
-      highlighter.classList.add("border-gray-300");
-      highlighter.classList.add("rounded-lg");
-      highlighter.classList.add("focus:outline-none");
-      highlighter.classList.add("focus:ring-2");
-      highlighter.classList.add("focus:ring-primary");
-      highlighter.classList.add("bg-red-200");
-    });
-  }, [value]);
+  // useLayoutEffect(() => {
+  //   const highlighters = document.querySelectorAll(
+  //     ".w-full__highlighter strong"
+  //   );
+  //   highlighters.forEach((highlighter) => {
+  //     highlighter.classList.add("border");
+  //     highlighter.classList.add("border-gray-300");
+  //     highlighter.classList.add("rounded-lg");
+  //     highlighter.classList.add("focus:outline-none");
+  //     highlighter.classList.add("focus:ring-2");
+  //     highlighter.classList.add("focus:ring-primary");
+  //     highlighter.classList.add("bg-red-200");
+  //   });
+  // }, [value]);
+
+  // useEffect(() => {
+  //   if (!textareaRef.current) {
+  //     return;
+  //   }
+
+  //   textareaRef.current.innerHTML = textareaRef.current.value.replaceAll(
+  //     /@([^\s]+)/g,
+  //     "<mark>$1</mark>"
+  //   );
+  // }, [textareaRef]);
 
   useEffect(() => {
     if (fetcher.state === "idle" && fetcher.data == null) {
@@ -117,7 +169,9 @@ export default function Index() {
       <section className="flex flex-col w-6/12 justify-center gap-4 py-8 md:py-10">
         <div className="inline-block max-w-7xl text-center justify-center">
           <span className={title()}>Create Your </span>
-          <span className={title({ color: "violet" })}>Agentic MCP Server</span>
+          <span className={title({ color: "violet" })}>
+            Agentic MCP Server{" "}
+          </span>
           <span className={title()}>with a Single Prompt.</span>
           <div className={subtitle({ class: "mt-4" })}>
             Powered by the composition of thousands of underlying MCPs, Try it
@@ -126,9 +180,16 @@ export default function Index() {
         </div>
 
         <Mention
-          // unstyled
+          field={"resolvedToolDef"}
+          value={value}
           inputRef={textareaRef}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            const { value } = e.target as HTMLInputElement;
+            setValue(value?.replaceAll(/>([^\s]+)/g, "$1"));
+            setResolvedValue(
+              value?.replaceAll(/>([^\s]+)/g, '<tool name="$1"/>')
+            );
+          }}
           onSearch={(e) => {
             fetcher.submit(
               {
@@ -138,20 +199,20 @@ export default function Index() {
             );
           }}
           ref={mentionRef}
-          trigger="@"
+          trigger=">"
           suggestions={servers.map((server) => ({
             ...server,
             id: server.qualifiedName,
           }))}
-          placeholder="Enter @ to mention people"
+          placeholder="Enter > to reference MCP as dependencies"
           itemTemplate={renderSuggestion}
-          inputClassName="w-full min-h-24 z-0"
-          panelClassName="w-8/12 min-h-24 z-50"
+          inputClassName="w-full z-0 p-2"
+          panelClassName="w-8/12  overflow-x-scroll z-50 p-2 border-1 rounded-lg shadow-md bg-content1"
           className="min-h-24 z-50"
         />
 
         <Button className="mt-8" color="primary" variant="bordered">
-          Create MCP
+          Create Your MCP Server
         </Button>
       </section>
     </IndexLayout>

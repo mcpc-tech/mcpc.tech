@@ -1,6 +1,10 @@
 // Define types for the API responses
 export interface ServerListResponse {
   servers: Array<{
+    // Extended info
+    resolvedToolDef?: string;
+    detail?: ServerDetailResponse;
+
     qualifiedName: string;
     displayName: string;
     description: string;
