@@ -132,32 +132,6 @@ export default function Index() {
     mentionRef.current?.focus();
   }, [mentionRef]);
 
-  // useLayoutEffect(() => {
-  //   const highlighters = document.querySelectorAll(
-  //     ".w-full__highlighter strong"
-  //   );
-  //   highlighters.forEach((highlighter) => {
-  //     highlighter.classList.add("border");
-  //     highlighter.classList.add("border-gray-300");
-  //     highlighter.classList.add("rounded-lg");
-  //     highlighter.classList.add("focus:outline-none");
-  //     highlighter.classList.add("focus:ring-2");
-  //     highlighter.classList.add("focus:ring-primary");
-  //     highlighter.classList.add("bg-red-200");
-  //   });
-  // }, [value]);
-
-  // useEffect(() => {
-  //   if (!textareaRef.current) {
-  //     return;
-  //   }
-
-  //   textareaRef.current.innerHTML = textareaRef.current.value.replaceAll(
-  //     /@([^\s]+)/g,
-  //     "<mark>$1</mark>"
-  //   );
-  // }, [textareaRef]);
-
   useEffect(() => {
     if (fetcher.state === "idle" && fetcher.data == null) {
       fetcher.load("/smithery");
