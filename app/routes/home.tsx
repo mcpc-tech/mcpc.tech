@@ -12,6 +12,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Spinner,
 } from "@heroui/react";
 import React, { useRef, useEffect, useState } from "react";
 import { SuggestionDataItem } from "react-mentions";
@@ -22,13 +23,48 @@ import { CodeBlock } from "~/components/code";
 import { JSONSchemaFaker } from "json-schema-faker";
 
 export function HydrateFallback() {
-  return <div>Loading...</div>;
+  return <Spinner />;
 }
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "MCP Compose" },
-    { name: "description", content: "MCP Compose" },
+    { title: "MCP Compose - Create Agentic MCP Servers" },
+    {
+      name: "description",
+      content:
+        "Create your agentic MCP server with a single prompt. Powered by the composition of thousands of MCPs.",
+    },
+    {
+      name: "keywords",
+      content:
+        "MCP, MCP Compose, agentic servers, smithery.ai, server composition",
+    },
+    {
+      property: "og:title",
+      content: "MCP Compose - Create Agentic MCP Servers",
+    },
+    {
+      property: "og:description",
+      content:
+        "Create your agentic MCP server with a single prompt. Powered by the composition of thousands of MCPs.",
+    },
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://mcpc.tech" },
+    { property: "og:image", content: "https://mcpc.tech/og-image.png" }, // You'll need to create this image
+    { name: "twitter:card", content: "summary_large_image" },
+    {
+      name: "twitter:title",
+      content: "MCP Compose - Create Agentic MCP Servers",
+    },
+    {
+      name: "twitter:description",
+      content:
+        "Create your agentic MCP server with a single prompt. Powered by the composition of thousands of MCPs.",
+    },
+    { name: "twitter:image", content: "https://mcpc.tech/og-image.png" }, // Same image as OG
+    { name: "robots", content: "index, follow" },
+    { name: "viewport", content: "width=device-width, initial-scale=1" },
+    { charSet: "utf-8" },
   ];
 };
 
