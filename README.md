@@ -44,3 +44,7 @@ public-hoist-pattern[]=*@heroui/*
 ```
 
 After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
+
+
+### React-Router + Cloudflare Pages
+https://github.com/remix-run/react-router/discussions/12667
