@@ -17,5 +17,6 @@ export const siteConfig = {
   ],
   links: {
     github: "https://github.com/mcpc-tech/mcpc",
+    x: "https://x.com/mcpctech",
   },
 };

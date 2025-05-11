@@ -13,7 +13,7 @@ import { Input } from "@heroui/input";
 import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
 
-import { GithubIcon, SearchIcon } from "~/components/icons";
+import { GithubIcon, SearchIcon, TwitterIcon } from "~/components/icons";
 import { siteConfig } from "~/config/site";
 import { useEffect, useState } from "react";
 import { ThemeSwitch } from "./theme-switch";
@@ -84,6 +84,9 @@ export const Navbar = () => {
         <NavbarItem className="hidden sm:flex gap-2">
           <Link isExternal aria-label="Github" href={siteConfig.links.github}>
             <GithubIcon className="text-default-500" />
+          </Link>
+          <Link isExternal aria-label="X" href={siteConfig.links.x}>
+            <TwitterIcon className="text-default-500" />
           </Link>
           <ThemeSwitch />
         </NavbarItem>

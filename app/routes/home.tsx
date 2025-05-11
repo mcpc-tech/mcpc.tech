@@ -239,8 +239,11 @@ export default function Index() {
             "run",
             "--allow-all",
             "jsr:@mcpc/core/bin",
-            `--mcpc-config=${configRaw}`,
+            // `--mcpc-config=${configRaw}`,
           ],
+          env: {
+            MCPC_CONFIG: configRaw,
+          },
         },
       },
     };
