@@ -131,3 +131,58 @@ export async function loader({
     );
   }
 }
+
+export function schemaToEnv(
+  schema: any,
+  prefix: string
+): Record<string, string> {
+  const env: Record<string, string> = {};
+
+  if (!schema || !schema.properties) {
+    return env;
+  }
+
+  function processProperties(properties: any, prefix: string = "") {
+    for (const [key, value] of Object.entries(properties)) {
+      if (
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        value !== null
+      ) {
+        const prop = value as any;
+        if (prop.properties) {
+          processProperties(prop.properties, prefix ? `${prefix}_${key}` : key);
+          continue;
+        }
+        const envKey = prefix
+          ? `${prefix}_${key}`.toUpperCase()
+          : key.toUpperCase();
+
+        if (prop.default !== undefined) {
+          if (
+            typeof prop.default === "boolean" ||
+            typeof prop.default === "number"
+          ) {
+            env[envKey] = String(prop.default);
+          } else {
+            env[envKey] = String(prop.default);
+          }
+        } else if (prop.example !== undefined) {
+          if (
+            typeof prop.example === "boolean" ||
+            typeof prop.example === "number"
+          ) {
+            env[envKey] = String(prop.example);
+          } else {
+            env[envKey] = String(prop.example);
+          }
+        } else {
+          env[envKey] = key;
+        }
+      }
+    }
+  }
+
+  processProperties(schema.properties, prefix);
+  return env;
+}
