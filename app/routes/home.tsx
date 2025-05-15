@@ -72,7 +72,7 @@ export function IndexLayout({ children }: React.PropsWithChildren<unknown>) {
   return (
     <div className="relative flex flex-col h-screen">
       <Navbar />
-      <main className="container mx-auto max-w-8xl pt-16 px-6 flex-grow flex items-center justify-center">
+      <main className="container mx-auto max-w-[95%] md:max-w-[90%] lg:max-w-8xl pt-16 px-6 flex-grow flex items-center justify-center">
         <PrimeReactProvider>{children}</PrimeReactProvider>
       </main>
       <footer className="w-full flex items-center justify-center py-3 gap-2">
@@ -167,7 +167,7 @@ export default function Index() {
           aria-label={mcpSuggestion.qualifiedName}
           subtitle={mcpSuggestion.description}
           title={mcpSuggestion.qualifiedName}
-          className="rounded-lg w-full"
+          className="rounded-lg w-full whitespace-normal"
         >
           {tools && (
             <div className="w-full list-disc list-inside py-1 px-2">
@@ -200,7 +200,6 @@ export default function Index() {
   };
 
   const handleSubmit = () => {
-    setIsShowResult(true);
     const depsConfg = {
       // @ts-ignore
       mcpServers: {} as Record<string, any>,
@@ -248,6 +247,7 @@ export default function Index() {
       },
     };
     setMcpcConfig(config);
+    setIsShowResult(true);
   };
 
   useEffect(() => {
@@ -259,6 +259,18 @@ export default function Index() {
       fetcher.load("/smithery");
     }
   }, [fetcher]);
+
+  useEffect(() => {
+    if (detailFetcher.data) {
+      if (detailFetcher.data.tools?.length === 0) {
+        detailFetcher.data.tools.push({
+          name: "__ALL__",
+          description:
+            "No tools registered - you can select this placeholder for now and modify it later",
+        });
+      }
+    }
+  }, [detailFetcher.data]);
 
   return (
     <IndexLayout>
@@ -299,7 +311,7 @@ export default function Index() {
             ...server,
             id: server.qualifiedName,
           }))}
-          placeholder="Enter > to reference MCP as dependencies"
+          placeholder="Type > to search and reference MCPs from Smithery as dependencies"
           itemTemplate={renderSuggestion}
           inputClassName="w-full z-0 p-2"
           panelClassName="w-8/12  overflow-x-scroll z-50 p-2 border-1 rounded-lg shadow-md bg-content1"
@@ -327,7 +339,7 @@ export default function Index() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                Your MCP Server is Ready, Config:
+                Your MCP Server is Ready, Use & Share it 🎉
               </ModalHeader>
               <ModalBody>
                 <CodeBlock
