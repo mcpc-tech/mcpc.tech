@@ -29,6 +29,9 @@ import { PrimeReactProvider } from "primereact/api";
 import { CodeBlock } from "~/components/code";
 import { JSONSchemaFaker } from "json-schema-faker";
 
+const MCPC_SERVER_DEFAULT_NAME = "mcpc-server-name-example";
+const MCPC_TOOL_DEFAULT_NAME = "mcpc-tool-name-example";
+
 export function HydrateFallback() {
   return <Spinner />;
 }
@@ -132,8 +135,8 @@ export default function Index() {
   const [isShowResult, setIsShowResult] = useState(false);
   const [mcpcConfig, setMcpcConfig] = useState<any>({});
 
-  const [serverName, setServerName] = useState("");
-  const [toolName, setToolName] = useState("");
+  const [serverName, setServerName] = useState(MCPC_SERVER_DEFAULT_NAME);
+  const [toolName, setToolName] = useState(MCPC_TOOL_DEFAULT_NAME);
 
   const [serverDeps, setServerDeps] = useState<ServerListResponse["servers"]>(
     []
@@ -371,25 +374,33 @@ export default function Index() {
                 Your MCP Server is Ready, Use & Share it 🎉
               </ModalHeader>
               <ModalBody>
-                <Input
-                  isClearable
-                  name="serverName"
-                  label="Server Name"
-                  value={serverName}
-                  onChange={(e) => {
-                    setServerName(e.target.value);
-                  }}
-                />
+                <div className="flex justify-between gap-4">
+                  <Input
+                    isClearable
+                    name="serverName"
+                    label="Server Name"
+                    value={serverName}
+                    onChange={(e) => {
+                      setServerName(e.target.value);
+                    }}
+                    onClear={() => {
+                      setServerName(MCPC_SERVER_DEFAULT_NAME);
+                    }}
+                  />
 
-                <Input
-                  isClearable
-                  name="toolName"
-                  label="Tool Name"
-                  value={toolName}
-                  onChange={(e) => {
-                    setToolName(e.target.value);
-                  }}
-                />
+                  <Input
+                    isClearable
+                    name="toolName"
+                    label="Tool Name"
+                    value={toolName}
+                    onChange={(e) => {
+                      setToolName(e.target.value);
+                    }}
+                    onClear={() => {
+                      setToolName(MCPC_TOOL_DEFAULT_NAME);
+                    }}
+                  />
+                </div>
 
                 <CodeBlock code={mcpcConfigStr} language={"json"} />
               </ModalBody>
