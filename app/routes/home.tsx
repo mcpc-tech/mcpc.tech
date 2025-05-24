@@ -7,6 +7,7 @@ import {
   AccordionItem,
   Button,
   Divider,
+  Input,
   Modal,
   ModalBody,
   ModalContent,
@@ -14,7 +15,13 @@ import {
   ModalHeader,
   Spinner,
 } from "@heroui/react";
-import React, { useRef, useEffect, useState } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { SuggestionDataItem } from "react-mentions";
 import { ServerDetailResponse, ServerListResponse } from "~/routes/smithery";
 import { Mention } from "primereact/mention";
@@ -125,11 +132,18 @@ export default function Index() {
   const [isShowResult, setIsShowResult] = useState(false);
   const [mcpcConfig, setMcpcConfig] = useState<any>({});
 
+  const [serverName, setServerName] = useState("");
+  const [toolName, setToolName] = useState("");
+
   const [serverDeps, setServerDeps] = useState<ServerListResponse["servers"]>(
     []
   );
   const textareaRef = useRef<HTMLInputElement>(null);
   const mentionRef = useRef<Mention>(null);
+  const mcpcConfigStr = useMemo(
+    () => JSON.stringify(mcpcConfig, null, 2),
+    [mcpcConfig]
+  );
 
   console.log({
     servers,
@@ -141,6 +155,57 @@ export default function Index() {
     resolvedValue,
     serverDeps,
   });
+
+  const calcMcpcConfig = useCallback(() => {
+    const depsConfg = {
+      // @ts-ignore
+      mcpServers: {} as Record<string, any>,
+    };
+    serverDeps.forEach(({ detail, qualifiedName }) => {
+      const stdio = detail?.connections.find((v) => v.type === "stdio");
+      const remote = detail?.connections.find((v) => v.type === "http");
+
+      if (stdio) {
+        depsConfg.mcpServers[qualifiedName] = eval(stdio.stdioFunction ?? "")?.(
+          stdio?.exampleConfig ?? {}
+        );
+      } else if (remote) {
+        // Faking a config
+        remote.config = JSONSchemaFaker.generate(remote.configSchema as any);
+        Reflect.deleteProperty(remote, "configSchema");
+        depsConfg.mcpServers[qualifiedName] = {
+          smitheryConfig: remote,
+        };
+      }
+    });
+    const configRaw = JSON.stringify([
+      {
+        name: toolName,
+        description: resolvedValue,
+        deps: depsConfg,
+      },
+    ]);
+    const config = {
+      mcpServers: {
+        [serverName]: {
+          command: "npx",
+          args: [
+            "-y",
+            "deno",
+            "run",
+            "--allow-all",
+            "jsr:@mcpc/core/bin",
+            // `--mcpc-config=${configRaw}`,
+          ],
+          env: {
+            MCPC_CONFIG: configRaw,
+          },
+        },
+      },
+    };
+
+    return config;
+  }, [serverDeps, serverName, toolName, resolvedValue]);
 
   const renderSuggestion = (
     suggestion: SuggestionDataItem
@@ -200,52 +265,7 @@ export default function Index() {
   };
 
   const handleSubmit = () => {
-    const depsConfg = {
-      // @ts-ignore
-      mcpServers: {} as Record<string, any>,
-    };
-    serverDeps.forEach(({ detail, qualifiedName }) => {
-      const stdio = detail?.connections.find((v) => v.type === "stdio");
-      const remote = detail?.connections.find((v) => v.type === "http");
-
-      if (stdio) {
-        depsConfg.mcpServers[qualifiedName] = eval(stdio.stdioFunction ?? "")?.(
-          stdio?.exampleConfig ?? {}
-        );
-      } else if (remote) {
-        // Faking a config
-        remote.config = JSONSchemaFaker.generate(remote.configSchema as any);
-        Reflect.deleteProperty(remote, "configSchema");
-        depsConfg.mcpServers[qualifiedName] = {
-          smitheryConfig: remote,
-        };
-      }
-    });
-    const configRaw = JSON.stringify([
-      {
-        name: `your-tool-name`,
-        description: resolvedValue,
-        deps: depsConfg,
-      },
-    ]);
-    const config = {
-      mcpServers: {
-        "your-server-name": {
-          command: "npx",
-          args: [
-            "-y",
-            "deno",
-            "run",
-            "--allow-all",
-            "jsr:@mcpc/core/bin",
-            // `--mcpc-config=${configRaw}`,
-          ],
-          env: {
-            MCPC_CONFIG: configRaw,
-          },
-        },
-      },
-    };
+    const config = calcMcpcConfig();
     setMcpcConfig(config);
     setIsShowResult(true);
   };
@@ -271,6 +291,15 @@ export default function Index() {
       }
     }
   }, [detailFetcher.data]);
+
+  useEffect(() => {
+    setMcpcConfig((mcpcConfig: any) => {
+      if (!mcpcConfig) {
+        return mcpcConfig;
+      }
+      return calcMcpcConfig();
+    });
+  }, [calcMcpcConfig]);
 
   return (
     <IndexLayout>
@@ -342,10 +371,27 @@ export default function Index() {
                 Your MCP Server is Ready, Use & Share it 🎉
               </ModalHeader>
               <ModalBody>
-                <CodeBlock
-                  code={JSON.stringify(mcpcConfig, null, 2)}
-                  language={"json"}
+                <Input
+                  isClearable
+                  name="serverName"
+                  label="Server Name"
+                  value={serverName}
+                  onChange={(e) => {
+                    setServerName(e.target.value);
+                  }}
                 />
+
+                <Input
+                  isClearable
+                  name="toolName"
+                  label="Tool Name"
+                  value={toolName}
+                  onChange={(e) => {
+                    setToolName(e.target.value);
+                  }}
+                />
+
+                <CodeBlock code={mcpcConfigStr} language={"json"} />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
