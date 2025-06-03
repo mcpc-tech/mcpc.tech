@@ -306,7 +306,7 @@ export default function Index() {
 
   return (
     <IndexLayout>
-      <section className="flex flex-col w-6/12 justify-center gap-4 py-8 md:py-10">
+      <section className="flex flex-col w-full md:w-8/12 lg:w-6/12 justify-center gap-4 py-8 md:py-10">
         <div className="inline-block max-w-7xl text-center justify-center">
           <span className={title()}>Create Your </span>
           <span className={title({ color: "violet" })}>Agentic MCP Server</span>
@@ -315,17 +315,15 @@ export default function Index() {
             Powered by the composition of thousands of MCPs, Try it out below.
           </div>
 
-          <div className="mt-8">
-            <iframe
-              className="w-full aspect-video"
-              src="https://www.youtube.com/embed/7Z1H_y0QeRY?si=G0ouBQELLsQcYbke"
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            ></iframe>
-          </div>
+          <iframe
+            className="w-full aspect-video border-0 rounded-lg"
+            src="https://www.youtube.com/embed/7Z1H_y0QeRY?si=G0ouBQELLsQcYbke"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          ></iframe>
         </div>
 
         <Mention
