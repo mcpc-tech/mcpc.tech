@@ -309,12 +309,22 @@ export default function Index() {
       <section className="flex flex-col w-6/12 justify-center gap-4 py-8 md:py-10">
         <div className="inline-block max-w-7xl text-center justify-center">
           <span className={title()}>Create Your </span>
-          <span className={title({ color: "violet" })}>
-            Agentic MCP Server{" "}
-          </span>
+          <span className={title({ color: "violet" })}>Agentic MCP Server</span>
           <span className={title()}>with a Single Prompt.</span>
           <div className={subtitle({ class: "mt-4" })}>
             Powered by the composition of thousands of MCPs, Try it out below.
+          </div>
+
+          <div className="mt-8">
+            <iframe
+              className="w-full aspect-video"
+              src="https://www.youtube.com/embed/7Z1H_y0QeRY?si=G0ouBQELLsQcYbke"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            ></iframe>
           </div>
         </div>
 
