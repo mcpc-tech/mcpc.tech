@@ -174,7 +174,7 @@ export default function Index() {
         );
       } else if (remote) {
         // Faking a config
-        remote.config = JSONSchemaFaker.generate(remote.configSchema as any);
+        remote.config = JSONSchemaFaker.generate(remote.configSchema ?? {} as any);
         Reflect.deleteProperty(remote, "configSchema");
         depsConfg.mcpServers[qualifiedName] = {
           smitheryConfig: remote,
