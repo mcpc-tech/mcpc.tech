@@ -3,31 +3,21 @@ import { useFetcher, type MetaFunction } from "react-router";
 import { subtitle, title } from "~/components/primitives";
 import { Navbar } from "~/components/navbar";
 import {
-  Accordion,
-  AccordionItem,
   Button,
   Divider,
-  Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
   Spinner,
 } from "@heroui/react";
 import React, {
-  useRef,
   useEffect,
   useState,
   useMemo,
   useCallback,
 } from "react";
-import { SuggestionDataItem } from "react-mentions";
-import { ServerDetailResponse, ServerListResponse } from "~/routes/smithery";
-import { Mention } from "primereact/mention";
+import { ServerListResponse } from "~/routes/smithery";
 import { PrimeReactProvider } from "primereact/api";
-import { CodeBlock } from "~/components/code";
 import { JSONSchemaFaker } from "json-schema-faker";
+import { McpcConfigModal } from "../components/mcpc-config-modal";
+import { McpcMentionInput } from "../components/mcpc-mention-input";
 
 const MCPC_SERVER_DEFAULT_NAME = "mcpc-server-name-example";
 const MCPC_TOOL_DEFAULT_NAME = "mcpc-tool-name-example";
@@ -126,38 +116,16 @@ export default function Index() {
   const { servers } = (fetcher?.data as unknown as ServerListResponse) ?? {
     servers: [],
   };
-  const [value, setValue] = useState("");
-  const [resolvedValue, setResolvedValue] = useState("");
-  const [selectedServerNames, setSelectedServerNames] = useState(
-    new Set<string>()
-  );
-  const [selectedToolName, setSelectedToolName] = useState<string>();
   const [isShowResult, setIsShowResult] = useState(false);
   const [mcpcConfig, setMcpcConfig] = useState<any>({});
-
   const [serverName, setServerName] = useState(MCPC_SERVER_DEFAULT_NAME);
   const [toolName, setToolName] = useState(MCPC_TOOL_DEFAULT_NAME);
-
-  const [serverDeps, setServerDeps] = useState<ServerListResponse["servers"]>(
-    []
-  );
-  const textareaRef = useRef<HTMLInputElement>(null);
-  const mentionRef = useRef<Mention>(null);
+  const [serverDeps, setServerDeps] = useState<ServerListResponse["servers"]>([]);
+  const [resolvedValue, setResolvedValue] = useState("");
   const mcpcConfigStr = useMemo(
     () => JSON.stringify(mcpcConfig, null, 2),
     [mcpcConfig]
   );
-
-  console.log({
-    servers,
-    value,
-    fetcher,
-    detailFetcher,
-    selectedServerNames,
-    selectedToolName,
-    resolvedValue,
-    serverDeps,
-  });
 
   const calcMcpcConfig = useCallback(() => {
     const depsConfg = {
@@ -167,7 +135,6 @@ export default function Index() {
     serverDeps.forEach(({ detail, qualifiedName }) => {
       const stdio = detail?.connections.find((v) => v.type === "stdio");
       const remote = detail?.connections.find((v) => v.type === "http");
-
       if (stdio) {
         depsConfg.mcpServers[qualifiedName] = eval(stdio.stdioFunction ?? "")?.(
           stdio?.exampleConfig ?? {}
@@ -206,76 +173,14 @@ export default function Index() {
         },
       },
     };
-
     return config;
   }, [serverDeps, serverName, toolName, resolvedValue]);
-
-  const renderSuggestion = (
-    suggestion: SuggestionDataItem
-  ): React.ReactNode => {
-    const mcpSuggestion =
-      suggestion as unknown as ServerListResponse["servers"][number];
-    const tools = detailFetcher.data?.tools as ServerDetailResponse["tools"];
-
-    return (
-      <Accordion
-        className="rounded-none m-1"
-        selectedKeys={selectedServerNames}
-        onSelectionChange={(keys) => {
-          setSelectedServerNames(new Set(keys as string));
-          detailFetcher.submit(
-            { server: mcpSuggestion.qualifiedName },
-            { action: "/smithery", method: "GET" }
-          );
-        }}
-        variant="shadow"
-      >
-        <AccordionItem
-          key={mcpSuggestion.qualifiedName}
-          aria-label={mcpSuggestion.qualifiedName}
-          subtitle={mcpSuggestion.description}
-          title={mcpSuggestion.qualifiedName}
-          className="rounded-lg w-full whitespace-normal"
-        >
-          {tools && (
-            <div className="w-full list-disc list-inside py-1 px-2">
-              {tools.map((tool) => (
-                <button
-                  key={tool.name}
-                  onClick={() => {
-                    setSelectedToolName(tool.name);
-                    mcpSuggestion.resolvedToolDef = `${mcpSuggestion.qualifiedName}.${tool.name}`;
-                    // TODO: bug->not delete old deps when change tool/remove tool
-                    setServerDeps((deps) => [
-                      ...deps,
-                      { ...mcpSuggestion, detail: detailFetcher.data },
-                    ]);
-                    mentionRef.current?.hide();
-                  }}
-                  className="w-full text-left block px-4 py-2 rounded-md text-default-600 hover:text-primary hover:bg-default-100 transition-all duration-200 ease-in-out"
-                >
-                  <div className="w-full font-medium">{tool.name}</div>
-                  <div className="w-full ml-6 mt-1 text-sm text-gray-500">
-                    {tool.description}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </AccordionItem>
-      </Accordion>
-    );
-  };
 
   const handleSubmit = () => {
     const config = calcMcpcConfig();
     setMcpcConfig(config);
     setIsShowResult(true);
   };
-
-  useEffect(() => {
-    mentionRef.current?.focus();
-  }, [mentionRef]);
 
   useEffect(() => {
     if (fetcher.state === "idle" && fetcher.data == null) {
@@ -314,7 +219,6 @@ export default function Index() {
           <div className={subtitle({ class: "mt-4" })}>
             Powered by the composition of thousands of MCPs, Try it out below.
           </div>
-
           <iframe
             className="w-full aspect-video border-0 rounded-lg"
             src="https://www.youtube.com/embed/7Z1H_y0QeRY?si=G0ouBQELLsQcYbke"
@@ -325,39 +229,13 @@ export default function Index() {
             allowFullScreen
           ></iframe>
         </div>
-
-        <Mention
-          field={"resolvedToolDef"}
-          value={value}
-          inputRef={textareaRef}
-          onChange={(e) => {
-            const { value } = e.target as HTMLInputElement;
-            setValue(value);
-            setResolvedValue(
-              value?.replaceAll(/>([^\s]+)/g, '<tool name="$1"/>')
-            );
-          }}
-          onSearch={(e) => {
-            fetcher.submit(
-              {
-                q: `${encodeURIComponent(e.query)}`,
-              },
-              { action: "/smithery", method: "GET" }
-            );
-          }}
-          ref={mentionRef}
-          trigger=">"
-          suggestions={servers.map((server) => ({
-            ...server,
-            id: server.qualifiedName,
-          }))}
-          placeholder="Type > to search and reference MCPs from Smithery as dependencies"
-          itemTemplate={renderSuggestion}
-          inputClassName="w-full z-0 p-2"
-          panelClassName="w-8/12  overflow-x-scroll z-50 p-2 border-1 rounded-lg shadow-md bg-content1"
-          className="min-h-24 z-50"
+        <McpcMentionInput
+          servers={servers}
+          detailFetcher={detailFetcher}
+          fetcher={fetcher}
+          onDepsChange={setServerDeps}
+          onDescriptionChange={setResolvedValue}
         />
-
         <Button
           className="mt-8"
           onPress={handleSubmit}
@@ -367,69 +245,18 @@ export default function Index() {
           Create Your MCP Server
         </Button>
       </section>
-
-      <Modal
+      <McpcConfigModal
         isOpen={isShowResult}
-        size={"full"}
-        onClose={() => {
-          setIsShowResult(false);
-        }}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Your MCP Server is Ready, Use & Share it 🎉
-              </ModalHeader>
-              <ModalBody>
-                <div className="flex justify-between gap-4">
-                  <Input
-                    isClearable
-                    name="serverName"
-                    label="Server Name"
-                    value={serverName}
-                    onChange={(e) => {
-                      setServerName(e.target.value);
-                    }}
-                    onClear={() => {
-                      setServerName(MCPC_SERVER_DEFAULT_NAME);
-                    }}
-                  />
-
-                  <Input
-                    isClearable
-                    name="toolName"
-                    label="Tool Name"
-                    value={toolName}
-                    onChange={(e) => {
-                      setToolName(e.target.value);
-                    }}
-                    onClear={() => {
-                      setToolName(MCPC_TOOL_DEFAULT_NAME);
-                    }}
-                  />
-                </div>
-
-                <CodeBlock code={mcpcConfigStr} language={"json"} />
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-                <Button
-                  color="primary"
-                  onPress={() => {
-                    onClose();
-                    navigator.clipboard.writeText(JSON.stringify(mcpcConfig));
-                  }}
-                >
-                  Copy Config
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+        onClose={() => setIsShowResult(false)}
+        serverName={serverName}
+        setServerName={setServerName}
+        toolName={toolName}
+        setToolName={setToolName}
+        mcpcConfigStr={mcpcConfigStr}
+        mcpcConfig={mcpcConfig}
+        MCPC_SERVER_DEFAULT_NAME={MCPC_SERVER_DEFAULT_NAME}
+        MCPC_TOOL_DEFAULT_NAME={MCPC_TOOL_DEFAULT_NAME}
+      />
     </IndexLayout>
   );
 }

@@ -71,6 +71,13 @@ module.exports = {
         "plugin:import/recommended",
         "plugin:import/typescript",
       ],
+      rules: {
+        // 允许未使用的函数参数名（如类型定义参数）
+        '@typescript-eslint/no-unused-vars': [
+          'warn',
+          { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+        ],
+      },
     },
 
     // Node
