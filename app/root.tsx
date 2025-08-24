@@ -1,5 +1,6 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import type { LinksFunction } from "react-router";
+import { HeroUIProvider } from "@heroui/react";
 
 import "./tailwind.css";
 import React from "react";
@@ -16,7 +17,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <HeroUIProvider>
+          {children}
+        </HeroUIProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

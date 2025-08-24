@@ -13,6 +13,24 @@ type Pages = {
   "/": {
     params: {};
   };
+  "/docs/api/configuration": {
+    params: {};
+  };
+  "/docs/examples/basic": {
+    params: {};
+  };
+  "/docs/installation": {
+    params: {};
+  };
+  "/docs/quick-start": {
+    params: {};
+  };
+  "/docs/api/core": {
+    params: {};
+  };
+  "/docs": {
+    params: {};
+  };
   "/smithery": {
     params: {};
   };
@@ -21,11 +39,35 @@ type Pages = {
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/smithery";
+    page: "/" | "/docs/api/configuration" | "/docs/examples/basic" | "/docs/installation" | "/docs/quick-start" | "/docs/api/core" | "/docs" | "/smithery";
   };
   "routes/home.tsx": {
     id: "routes/home";
     page: "/";
+  };
+  "routes/docs.api.configuration.tsx": {
+    id: "routes/docs.api.configuration";
+    page: "/docs/api/configuration";
+  };
+  "routes/docs.examples.basic.tsx": {
+    id: "routes/docs.examples.basic";
+    page: "/docs/examples/basic";
+  };
+  "routes/docs.installation.tsx": {
+    id: "routes/docs.installation";
+    page: "/docs/installation";
+  };
+  "routes/docs.quick-start.tsx": {
+    id: "routes/docs.quick-start";
+    page: "/docs/quick-start";
+  };
+  "routes/docs.api.core.tsx": {
+    id: "routes/docs.api.core";
+    page: "/docs/api/core";
+  };
+  "routes/docs._index.tsx": {
+    id: "routes/docs._index";
+    page: "/docs";
   };
   "routes/smithery.ts": {
     id: "routes/smithery";
