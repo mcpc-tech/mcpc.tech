@@ -42,7 +42,17 @@ export const McpcMentionInput: React.FC<McpcMentionInputProps> = ({
     suggestion: SuggestionDataItem
   ): React.ReactNode => {
     const mcpSuggestion = suggestion as unknown as ServerListResponse["servers"][number];
-    const tools = detailFetcher.data?.tools as ServerDetailResponse["tools"];
+    const rawTools = ((detailFetcher.data?.tools as ServerDetailResponse["tools"]) ?? []) as ServerDetailResponse["tools"];
+    const tools =
+      (rawTools?.length ?? 0) > 0
+        ? rawTools
+        : ([
+            {
+              name: "__ALL__",
+              description:
+                "No tools registered - you can select this placeholder for now and modify it later",
+            },
+          ] as unknown as ServerDetailResponse["tools"]);
     return (
       <Accordion
         className="rounded-none m-1"
@@ -119,9 +129,9 @@ export const McpcMentionInput: React.FC<McpcMentionInputProps> = ({
       }))}
       placeholder="Type > to search and reference MCPs from Smithery as dependencies"
       itemTemplate={renderSuggestion}
-      inputClassName="w-full z-0 p-2"
-      panelClassName="w-8/12  overflow-x-scroll z-50 p-2 border-1 rounded-lg shadow-md bg-content1"
-      className="min-h-24 z-50"
+  inputClassName="w-full z-0 p-3 min-h-[72px]"
+  panelClassName="w-8/12 overflow-x-auto z-50 p-2 border-1 rounded-lg shadow-md bg-content1"
+  className="z-50"
     />
   );
 };
