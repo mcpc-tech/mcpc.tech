@@ -1,7 +1,7 @@
 import { type RouteConfig, redirect } from "react-router";
 import type { Route } from "./+types/docs.$path";
 import { DocsLayout } from "~/components/docs-layout";
-import { StreamdownRenderer } from "~/components/streamdown-renderer";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { useMdxContent } from "~/lib/use-mdx-content";
 import { getRouteByPath } from "~/lib/docs-config";
 
@@ -47,7 +47,7 @@ export default function DocsPage({ loaderData }: Route.ComponentProps) {
           <div className="text-red-500">Error loading documentation: {error}</div>
         </div>
       ) : (
-        <StreamdownRenderer content={content} />
+        <TiptapRenderer content={content} />
       )}
     </DocsLayout>
   );
