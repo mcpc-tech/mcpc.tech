@@ -21,14 +21,12 @@ const docsSidebarItems = [
     items: [
       { label: "Core API", href: "/docs/api/core" },
       { label: "Configuration", href: "/docs/api/configuration" },
-      { label: "Tools", href: "/docs/api/tools" },
     ],
   },
   {
     title: "Examples",
     items: [
       { label: "Basic Usage", href: "/docs/examples/basic" },
-      { label: "Advanced Patterns", href: "/docs/examples/advanced" },
     ],
   },
 ];

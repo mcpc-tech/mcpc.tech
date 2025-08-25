@@ -1,0 +1,52 @@
+# MCPC Documentation
+
+Build Agentic MCP Servers with Ease
+
+MCPC (MCP Compose) allows you to create powerful agentic MCP servers through composition of thousands of MCPs from the Smithery registry.
+
+## Key Features
+
+### Simple Composition
+Compose multiple MCP servers into a single agentic server using natural language descriptions.
+
+### Extensive Tool Library
+Access thousands of pre-built MCP tools from the Smithery registry for instant functionality.
+
+### Zero Setup
+No complex configuration required. Generate your server configuration with a single prompt.
+
+### Hot Reload
+Dynamic server composition allows you to add or remove tools without server restarts.
+
+## Getting Started
+
+### 1. Installation
+Install MCPC using npm or run directly with npx
+
+[View installation guide →](/docs/installation)
+
+### 2. Create Your First Server
+Use the web interface or CLI to compose your MCP server
+
+[Quick start guide →](/docs/quick-start)
+
+### 3. Deploy & Share
+Deploy your server and share it with the community
+
+[View examples →](/docs/examples/basic)
+
+## Example Usage
+
+```json
+{
+  "mcpServers": {
+    "my-agent": {
+      "command": "npx",
+      "args": ["-y", "deno", "run", "--allow-all", "jsr:@mcpc/core/bin"],
+      "env": {
+        "MCPC_CONFIG": "[{\"name\": \"data-processor\", \"description\": \"Process CSV files and generate reports\", \"deps\": {...}}]"
+      }
+    }
+  }
+}
+```

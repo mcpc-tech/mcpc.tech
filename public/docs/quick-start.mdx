@@ -1,0 +1,136 @@
+# Quick Start
+
+This guide will walk you through creating your first agentic MCP server using MCPC in under 5 minutes.
+
+## Prerequisites
+
+- Node.js 18+ installed on your system
+- Basic familiarity with command line
+- Internet connection for accessing the Smithery registry
+
+## Method 1: Using the Web Interface
+
+The fastest way to get started is through our web interface:
+
+### 1. Visit MCPC.tech
+Go to the homepage and describe what you want your MCP server to do.
+
+### 2. Describe Your Server
+Type a description like: "Create a server that can search GitHub repositories and create issues"
+
+```
+"I want to build a server that can search GitHub repositories, read file contents, and create issues when needed"
+```
+
+### 3. Select Tools
+Browse available MCP tools and select the ones you need. Type ">" to search the Smithery registry.
+
+### 4. Generate & Copy Configuration
+Click "Generate Config" to create your MCP server configuration, then copy it to use in your project.
+
+## Method 2: Command Line
+
+For developers who prefer the command line:
+
+### Step 1: Create a Configuration
+
+Create a configuration file describing your server:
+
+```bash
+# Create config.json
+cat > config.json << EOF
+[
+  {
+    "name": "github-helper",
+    "description": "A server that helps with GitHub operations",
+    "deps": {
+      "mcpServers": {
+        "@smithery_ai/github": {
+          "command": "npx",
+          "args": ["-y", "@smithery_ai/github"],
+          "env": {
+            "GITHUB_TOKEN": "your-github-token"
+          }
+        }
+      }
+    }
+  }
+]
+EOF
+```
+
+### Step 2: Run Your Server
+
+```bash
+# Set the configuration
+export MCPC_CONFIG="$(cat config.json)"
+
+# Run the server
+npx -y deno run --allow-all jsr:@mcpc/core/bin
+```
+
+### Step 3: Test Your Server
+
+```bash
+# In another terminal, test the server
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | npx -y deno run --allow-all jsr:@mcpc/core/bin
+```
+
+## Example: File Processing Server
+
+Let's create a practical example - a server that can read, process, and analyze files:
+
+```json
+{
+  "mcpServers": {
+    "file-processor": {
+      "command": "npx",
+      "args": ["-y", "deno", "run", "--allow-all", "jsr:@mcpc/core/bin"],
+      "env": {
+        "MCPC_CONFIG": "[{\"name\": \"file-analyzer\", \"description\": \"Read CSV files, analyze data patterns, and generate summaries\", \"deps\": {\"mcpServers\": {\"@modelcontextprotocol/server-filesystem\": {\"command\": \"npx\", \"args\": [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/path/to/data\"]}}}}]"
+      }
+    }
+  }
+}
+```
+
+This configuration creates a server that can:
+- Read files from the filesystem
+- Analyze CSV data patterns
+- Generate reports and summaries
+- Work with structured data
+
+## Common Patterns
+
+### Web Scraping Server
+Combine browserbase with filesystem tools for web scraping
+```
+@browserbasehq/mcp_browserbase + @modelcontextprotocol/server-filesystem
+```
+
+### Data Analysis Server
+Process and analyze data from multiple sources
+```
+@modelcontextprotocol/server-filesystem + @smithery/sequential-thinking
+```
+
+### DevOps Assistant
+Manage GitHub repos and execute commands
+```
+@smithery_ai/github + @wonderwhy_er/desktop_commander
+```
+
+### AI Research Agent
+Browse the web and analyze information
+```
+@browserbasehq/mcp_browserbase + @smithery/sequential-thinking
+```
+
+## Next Steps
+
+Great! You've created your first MCPC server. Here's what to explore next:
+
+- [Explore the Core API documentation](/docs/api/core)
+- [Check out advanced examples and patterns](/docs/examples/basic)
+- [Learn about advanced configuration options](/docs/api/configuration)
+- [Contribute to the project on GitHub](https://github.com/mcpc-tech/mcpc)

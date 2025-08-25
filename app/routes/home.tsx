@@ -238,7 +238,7 @@ export default function Index() {
               size="lg"
               className="min-w-[200px]"
             >
-              📚 Get Started
+              Get Started
             </Button>
             <Button
               as={Link}
@@ -247,7 +247,7 @@ export default function Index() {
               size="lg"
               className="min-w-[200px]"
             >
-              📖 Documentation
+              Documentation
             </Button>
             <Button
               as={Link}
@@ -256,7 +256,7 @@ export default function Index() {
               size="lg"
               className="min-w-[200px]"
             >
-              💡 Examples
+              Examples
             </Button>
           </div>
           
