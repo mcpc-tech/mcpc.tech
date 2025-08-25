@@ -223,8 +223,8 @@ export default function Index() {
           <span className={title()}>Create Your </span>
           <span className={title({ color: "violet" })}>
             Agentic MCP Server
-          </span>{" "}
-          <span className={title()}>with a Single Prompt.</span>
+          </span>
+          <span className={title()}> with a Single Prompt.</span>
           <div className={subtitle({ class: "mt-4" })}>
             Powered by the composition of thousands of MCPs, Try it out below.
           </div>
