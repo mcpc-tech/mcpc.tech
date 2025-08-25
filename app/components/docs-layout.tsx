@@ -1,37 +1,16 @@
 import { Link } from "@heroui/link";
 import { Navbar } from "~/components/navbar";
 import { ReactNode } from "react";
+import { getNavigation } from "~/lib/docs-config";
 
 interface DocsLayoutProps {
   children: ReactNode;
   title?: string;
 }
 
-const docsSidebarItems = [
-  {
-    title: "Getting Started",
-    items: [
-      { label: "Overview", href: "/docs" },
-      { label: "Installation", href: "/docs/installation" },
-      { label: "Quick Start", href: "/docs/quick-start" },
-    ],
-  },
-  {
-    title: "API Reference",
-    items: [
-      { label: "Core API", href: "/docs/api/core" },
-      { label: "Configuration", href: "/docs/api/configuration" },
-    ],
-  },
-  {
-    title: "Examples",
-    items: [
-      { label: "Basic Usage", href: "/docs/examples/basic" },
-    ],
-  },
-];
-
 export const DocsLayout = ({ children, title }: DocsLayoutProps) => {
+  const navigationSections = getNavigation();
+
   return (
     <div className="relative flex flex-col h-screen">
       <Navbar />
@@ -40,19 +19,19 @@ export const DocsLayout = ({ children, title }: DocsLayoutProps) => {
         <aside className="hidden md:flex w-64 flex-col border-r border-divider bg-content1">
           <div className="flex-1 overflow-auto p-6">
             <nav className="space-y-6">
-              {docsSidebarItems.map((section) => (
-                <div key={section.title}>
+              {navigationSections.map((section) => (
+                <div key={section.section}>
                   <h3 className="mb-2 text-sm font-semibold text-foreground-600 uppercase tracking-wide">
-                    {section.title}
+                    {section.section}
                   </h3>
                   <ul className="space-y-2">
                     {section.items.map((item) => (
-                      <li key={item.href}>
+                      <li key={item.path}>
                         <Link
-                          href={item.href}
+                          href={`/docs${item.path === "/" ? "" : item.path}`}
                           className="block py-1 text-sm text-foreground-700 hover:text-primary transition-colors"
                         >
-                          {item.label}
+                          {item.title}
                         </Link>
                       </li>
                     ))}
@@ -73,9 +52,7 @@ export const DocsLayout = ({ children, title }: DocsLayoutProps) => {
                 </h1>
               </header>
             )}
-            <div className="prose prose-slate dark:prose-invert max-w-none">
-              {children}
-            </div>
+            {children}
           </div>
         </main>
       </div>

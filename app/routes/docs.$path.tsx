@@ -1,12 +1,14 @@
 import { type RouteConfig, redirect } from "react-router";
-import type { Route } from "./+types/docs._index";
+import type { Route } from "./+types/docs.$path";
 import { DocsLayout } from "~/components/docs-layout";
 import { StreamdownRenderer } from "~/components/streamdown-renderer";
 import { useMdxContent } from "~/lib/use-mdx-content";
 import { getRouteByPath } from "~/lib/docs-config";
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const route = getRouteByPath("/");
+  const path = params.path === undefined ? "/" : `/${params.path}`;
+  
+  const route = getRouteByPath(path);
   
   if (!route) {
     throw redirect("/docs");
@@ -30,7 +32,7 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
-export default function DocsIndexPage({ loaderData }: Route.ComponentProps) {
+export default function DocsPage({ loaderData }: Route.ComponentProps) {
   const { route } = loaderData;
   const { content, loading, error } = useMdxContent(route.file);
 
