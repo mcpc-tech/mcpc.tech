@@ -123,7 +123,7 @@ export const McpcMentionInput: React.FC<McpcMentionInputProps> = ({
       }}
       ref={mentionRef}
       trigger=">"
-      suggestions={servers.map((server) => ({
+      suggestions={(servers || []).map((server) => ({
         ...server,
         id: server.qualifiedName,
       }))}

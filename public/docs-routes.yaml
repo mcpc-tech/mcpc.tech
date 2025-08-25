@@ -1,0 +1,55 @@
+# MCPC Documentation Routes Configuration
+# This file demonstrates how documentation routes can be configured declaratively
+
+routes:
+  - path: "/"
+    title: "Overview"
+    description: "Learn how to create agentic MCP servers with MCPC"
+    file: "/docs/index.mdx"
+  
+  - path: "/installation"
+    title: "Installation"
+    description: "Install and set up MCPC in your project"
+    file: "/docs/installation.mdx"
+  
+  - path: "/quick-start"
+    title: "Quick Start"
+    description: "Get started with MCPC in minutes"
+    file: "/docs/quick-start.mdx"
+  
+  - path: "/api/core"
+    title: "Core API"
+    description: "Core MCPC API reference"
+    file: "/docs/api/core.mdx"
+  
+  - path: "/api/configuration"
+    title: "Configuration"
+    description: "Configuration options and settings"
+    file: "/docs/api/configuration.mdx"
+  
+  - path: "/examples/basic"
+    title: "Basic Examples"
+    description: "Basic usage patterns and examples"
+    file: "/docs/examples/basic.mdx"
+
+navigation:
+  - section: "Getting Started"
+    items:
+      - path: "/"
+        title: "Overview"
+      - path: "/installation"
+        title: "Installation"
+      - path: "/quick-start" 
+        title: "Quick Start"
+  
+  - section: "API Reference"
+    items:
+      - path: "/api/core"
+        title: "Core API"
+      - path: "/api/configuration"
+        title: "Configuration"
+  
+  - section: "Examples"
+    items:
+      - path: "/examples/basic"
+        title: "Basic Examples"

@@ -1,0 +1,234 @@
+# Basic Examples
+
+These examples demonstrate common MCPC patterns and use cases. Each example includes the complete configuration and explanation.
+
+## 1. File Manager Server
+
+A simple server that can read, write, and manage files in a specific directory.
+
+### Configuration
+
+```json
+[
+  {
+    "name": "file-manager",
+    "description": "Manage files and directories with read, write, and search capabilities",
+    "deps": {
+      "mcpServers": {
+        "@modelcontextprotocol/server-filesystem": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/documents"],
+          "env": {}
+        }
+      }
+    }
+  }
+]
+```
+
+### Use Cases
+- Document management and organization
+- Code file manipulation and analysis
+- Backup and sync operations
+- Content search and indexing
+
+### Running the Server
+
+```bash
+export MCPC_CONFIG='[{"name":"file-manager","description":"Manage files and directories","deps":{"mcpServers":{"@modelcontextprotocol/server-filesystem":{"command":"npx","args":["-y","@modelcontextprotocol/server-filesystem","/home/user/documents"],"env":{}}}}}]'
+
+npx -y deno run --allow-all jsr:@mcpc/core/bin
+```
+
+## 2. GitHub Assistant
+
+A server that can interact with GitHub repositories, search code, create issues, and manage pull requests.
+
+### Configuration
+
+```json
+[
+  {
+    "name": "github-assistant",
+    "description": "Comprehensive GitHub operations including repository management, issue tracking, and code search",
+    "deps": {
+      "mcpServers": {
+        "@smithery_ai/github": {
+          "command": "npx",
+          "args": ["-y", "@smithery_ai/github"],
+          "env": {
+            "GITHUB_TOKEN": "ghp_your_personal_access_token_here"
+          }
+        }
+      }
+    }
+  }
+]
+```
+
+### Setup Required
+You'll need a GitHub Personal Access Token with appropriate permissions. Generate one at `github.com/settings/tokens`
+
+### Available Tools
+
+#### Repository Operations
+- Search repositories
+- Create new repositories
+- Fork repositories
+- Get repository contents
+
+#### Issue & PR Management
+- Create and update issues
+- Create pull requests
+- Manage branches
+- Push files and commits
+
+## 3. Web Scraping Server
+
+A server that can browse websites, take screenshots, and extract information using a cloud browser.
+
+### Configuration
+
+```json
+[
+  {
+    "name": "web-scraper",
+    "description": "Browse websites, take screenshots, and extract content using cloud browsers",
+    "deps": {
+      "mcpServers": {
+        "@browserbasehq/mcp_browserbase": {
+          "command": "npx",
+          "args": ["-y", "@browserbasehq/mcp_browserbase"],
+          "env": {
+            "BROWSERBASE_API_KEY": "your-browserbase-api-key",
+            "BROWSERBASE_PROJECT_ID": "your-project-id"
+          }
+        }
+      }
+    }
+  }
+]
+```
+
+### External Service
+This example requires a Browserbase account and API key. Sign up at `browserbase.com` for cloud browser access.
+
+## 4. Development Environment
+
+A comprehensive development server combining file operations, GitHub integration, and command execution.
+
+### Configuration
+
+```json
+[
+  {
+    "name": "dev-environment",
+    "description": "Complete development environment with file management, GitHub integration, and terminal access",
+    "deps": {
+      "mcpServers": {
+        "@modelcontextprotocol/server-filesystem": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspace"],
+          "env": {}
+        },
+        "@smithery_ai/github": {
+          "command": "npx",
+          "args": ["-y", "@smithery_ai/github"],
+          "env": {
+            "GITHUB_TOKEN": "ghp_your_token_here"
+          }
+        },
+        "@wonderwhy_er/desktop_commander": {
+          "command": "npx",
+          "args": ["-y", "@wonderwhy_er/desktop_commander"],
+          "env": {
+            "ALLOWED_COMMANDS": "git,npm,yarn,node,python,pip"
+          }
+        }
+      }
+    }
+  }
+]
+```
+
+### Power User Setup
+This configuration creates a powerful development assistant that can:
+- Manage project files and directories
+- Execute git commands and manage repositories
+- Install dependencies and run build scripts
+- Create GitHub issues and pull requests
+- Search code across repositories
+
+## 5. Data Analysis Server
+
+A server that can process files and provide intelligent analysis using sequential thinking.
+
+### Configuration
+
+```json
+[
+  {
+    "name": "data-analyst",
+    "description": "Analyze data files and provide insights using sequential thinking patterns",
+    "deps": {
+      "mcpServers": {
+        "@modelcontextprotocol/server-filesystem": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-filesystem", "/data"],
+          "env": {}
+        },
+        "@smithery/sequential-thinking": {
+          "command": "npx",
+          "args": ["-y", "@smithery/sequential-thinking"],
+          "env": {}
+        }
+      }
+    }
+  }
+]
+```
+
+### Example Usage
+
+```json
+# Read a CSV file and analyze patterns
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "filesystem_read_file",
+    "arguments": {
+      "path": "/data/sales.csv"
+    }
+  }
+}
+
+# Use sequential thinking to analyze the data
+{
+  "jsonrpc": "2.0", 
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "sequentialthinking",
+    "arguments": {
+      "prompt": "Analyze this sales data and identify trends, patterns, and key insights",
+      "context": "CSV data from previous call"
+    }
+  }
+}
+```
+
+## Tips for Success
+
+### Configuration Tips
+- Start with single-server configurations
+- Test each server independently first
+- Use environment variables for sensitive data
+- Keep descriptions clear and specific
+
+### Debugging Tips
+- Set `MCPC_LOG_LEVEL=debug`
+- Check server logs for connection issues
+- Verify API keys and permissions
+- Test tool calls individually

@@ -1,0 +1,331 @@
+# Configuration
+
+MCPC provides flexible configuration options for server composition, deployment, and runtime behavior.
+
+## Basic Configuration Structure
+
+MCPC configurations are defined as JSON arrays containing tool definitions:
+
+```json
+[
+  {
+    "name": "string",              // Tool identifier (required)
+    "description": "string",       // Human-readable description (required)
+    "version": "1.0.0",           // Tool version (optional)
+    "author": "string",           // Tool author (optional)
+    "deps": {                     // Dependencies configuration (required)
+      "mcpServers": {
+        "server-name": {
+          "command": "string",      // Executable command
+          "args": ["string"],       // Command arguments
+          "env": {                  // Environment variables
+            "KEY": "value"
+          },
+          "timeout": 30000,         // Connection timeout (ms)
+          "retries": 3,            // Connection retry attempts
+          "stdio": true,           // Use stdio transport (default)
+          "transport": "stdio"     // Transport type
+        }
+      }
+    },
+    "metadata": {                 // Additional metadata (optional)
+      "tags": ["tag1", "tag2"],
+      "category": "string",
+      "documentation": "url"
+    }
+  }
+]
+```
+
+## Server Configuration Options
+
+### Standard MCP Server
+
+```json
+"@modelcontextprotocol/server-filesystem": {
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspace"],
+  "env": {
+    "NODE_ENV": "production",
+    "DEBUG": "mcp:*"
+  },
+  "timeout": 10000,
+  "retries": 2
+}
+```
+
+### Custom Server Configuration
+
+```json
+"my-custom-server": {
+  "command": "python",
+  "args": ["-m", "my_mcp_server", "--config", "/etc/config.json"],
+  "env": {
+    "PYTHONPATH": "/usr/local/lib/python3.9/site-packages",
+    "LOG_LEVEL": "INFO"
+  },
+  "cwd": "/app",
+  "timeout": 30000
+}
+```
+
+### HTTP/WebSocket Server
+
+```json
+"remote-server": {
+  "transport": "http",
+  "url": "https://api.example.com/mcp",
+  "headers": {
+    "Authorization": "Bearer token",
+    "Content-Type": "application/json"
+  },
+  "timeout": 5000
+}
+```
+
+## Environment Variables
+
+### MCPC_CONFIG
+Main configuration as JSON string. Can be file path or inline JSON.
+
+```bash
+MCPC_CONFIG='[{"name":"tool","description":"desc","deps":{}}]'
+```
+
+```bash
+MCPC_CONFIG=/path/to/config.json
+```
+
+### MCPC_LOG_LEVEL
+Controls logging verbosity. Options: `error`, `warn`, `info`, `debug`
+
+```bash
+MCPC_LOG_LEVEL=debug
+```
+
+### MCPC_TIMEOUT
+Global timeout for server operations in milliseconds.
+
+```bash
+MCPC_TIMEOUT=60000
+```
+
+### MCPC_MAX_RETRIES
+Maximum number of retry attempts for failed server connections.
+
+```bash
+MCPC_MAX_RETRIES=3
+```
+
+### MCPC_CACHE_DIR
+Directory for caching server metadata and tool schemas.
+
+```bash
+MCPC_CACHE_DIR=/tmp/mcpc-cache
+```
+
+## Advanced Configuration
+
+### Tool Filtering and Mapping
+
+```json
+{
+  "name": "filtered-tools",
+  "description": "Server with selective tool exposure",
+  "deps": {
+    "mcpServers": {
+      "@smithery_ai/github": {
+        "command": "npx",
+        "args": ["-y", "@smithery_ai/github"],
+        "env": { "GITHUB_TOKEN": "token" },
+        "toolFilter": {
+          "include": ["search_repositories", "create_issue"],
+          "exclude": ["delete_repository"]
+        },
+        "toolMapping": {
+          "search_repositories": "github_search",
+          "create_issue": "github_create_issue"
+        }
+      }
+    }
+  }
+}
+```
+
+### Resource Limits
+
+```json
+{
+  "name": "resource-limited",
+  "description": "Server with resource constraints",
+  "deps": {
+    "mcpServers": {
+      "heavy-server": {
+        "command": "node",
+        "args": ["server.js"],
+        "limits": {
+          "memory": "512MB",
+          "cpu": "50%",
+          "timeout": 30000,
+          "maxConcurrentCalls": 5
+        }
+      }
+    }
+  }
+}
+```
+
+### Health Checks
+
+```json
+{
+  "name": "monitored-server",
+  "description": "Server with health monitoring",
+  "deps": {
+    "mcpServers": {
+      "api-server": {
+        "command": "python",
+        "args": ["-m", "api_server"],
+        "healthCheck": {
+          "enabled": true,
+          "interval": 30000,
+          "timeout": 5000,
+          "retries": 3,
+          "method": "ping"
+        }
+      }
+    }
+  }
+}
+```
+
+## Configuration Files
+
+### JSON Configuration
+
+Store configuration in a `mcpc.config.json` file:
+
+```json
+{
+  "version": "1.0",
+  "tools": [
+    {
+      "name": "dev-assistant",
+      "description": "Development helper tools",
+      "deps": {
+        "mcpServers": {
+          "@modelcontextprotocol/server-filesystem": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-filesystem", "${WORKSPACE_DIR}"]
+          }
+        }
+      }
+    }
+  ],
+  "globals": {
+    "timeout": 30000,
+    "retries": 3,
+    "logLevel": "info"
+  }
+}
+```
+
+### Environment File (.env)
+
+```bash
+# MCPC Configuration
+MCPC_CONFIG=./mcpc.config.json
+MCPC_LOG_LEVEL=info
+MCPC_TIMEOUT=30000
+
+# Server Environment Variables
+GITHUB_TOKEN=ghp_your_token_here
+WORKSPACE_DIR=/workspace
+NODE_ENV=production
+```
+
+## Deployment Configuration
+
+### Docker Deployment
+
+```dockerfile
+# Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY mcpc.config.json ./
+ENV MCPC_CONFIG=/app/mcpc.config.json
+
+EXPOSE 3000
+CMD ["npx", "-y", "deno", "run", "--allow-all", "jsr:@mcpc/core/bin"]
+```
+
+### Kubernetes Configuration
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcpc-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mcpc-server
+  template:
+    metadata:
+      labels:
+        app: mcpc-server
+    spec:
+      containers:
+      - name: mcpc
+        image: mcpc/server:latest
+        env:
+        - name: MCPC_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: mcpc-config
+              key: config.json
+        - name: MCPC_LOG_LEVEL
+          value: "info"
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+```
+
+## Configuration Best Practices
+
+### Security
+- Store secrets in environment variables
+- Use file paths for large configurations
+- Validate server certificates in production
+- Limit server resource usage
+- Enable health checks for critical servers
+
+### Performance
+- Set appropriate timeouts for each server
+- Use caching for frequently accessed data
+- Monitor server resource usage
+- Configure connection pooling
+- Implement graceful degradation
+
+### Maintenance
+- Version your configuration files
+- Document server dependencies
+- Use consistent naming conventions
+- Test configurations in staging first
+- Monitor server health and performance
+
+### Monitoring
+- Enable structured logging
+- Set up alerting for server failures
+- Track tool usage and performance
+- Monitor resource consumption
+- Collect metrics for optimization

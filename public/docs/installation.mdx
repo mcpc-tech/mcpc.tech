@@ -1,0 +1,102 @@
+# Installation
+
+MCPC can be used in multiple ways - through the web interface, as a CLI tool, or as a library in your Node.js projects.
+
+## Web Interface (Recommended)
+
+The easiest way to get started is through our web interface at `mcpc.tech`. No installation required!
+
+1. Visit `https://mcpc.tech`
+2. Describe what you want your MCP server to do
+3. Select tools from the Smithery registry
+4. Copy the generated configuration
+
+## Direct Execution with npx
+
+Run MCPC directly without installation using npx:
+
+```bash
+npx -y deno run --allow-all jsr:@mcpc/core/bin
+```
+
+This method requires no local installation and always uses the latest version.
+
+## Global Installation
+
+Install MCPC globally to use it from anywhere:
+
+```bash
+# Install Deno (if not already installed)
+curl -fsSL https://deno.land/install.sh | sh
+
+# Or with npm
+npm install -g @mcpc/cli
+
+# Verify installation
+mcpc --version
+```
+
+## Project Installation
+
+Add MCPC as a dependency in your Node.js project:
+
+```bash
+# npm
+npm install @mcpc/core
+
+# yarn
+yarn add @mcpc/core
+
+# pnpm
+pnpm add @mcpc/core
+```
+
+## Requirements
+
+### System Requirements
+- Node.js 18+ or Deno 1.40+
+- Internet connection (for accessing Smithery registry)
+- Memory: 512MB+ recommended
+
+### Supported Platforms
+- Windows 10/11
+- macOS 10.15+
+- Linux (Ubuntu 18.04+, other distributions)
+- Docker containers
+
+## Docker Usage
+
+Run MCPC in a Docker container:
+
+```bash
+# Pull the image
+docker pull mcpc/core:latest
+
+# Run with configuration
+docker run -e MCPC_CONFIG='[{"name":"my-tool","description":"...","deps":{}}]' mcpc/core:latest
+
+# Or mount a config file
+docker run -v /path/to/config.json:/app/config.json mcpc/core:latest
+```
+
+## Verify Installation
+
+Test your installation by creating a simple server:
+
+```bash
+# Test the installation
+export MCPC_CONFIG='[{"name":"hello","description":"A simple hello world tool","deps":{}}]'
+npx -y deno run --allow-all jsr:@mcpc/core/bin
+
+# You should see:
+# MCPC Server starting...
+# Server ready on stdio
+```
+
+## Next Steps
+
+Now that you have MCPC installed, you can:
+
+- [Follow the Quick Start guide](/docs/quick-start)
+- [Explore basic examples](/docs/examples/basic)
+- [Read the API documentation](/docs/api/core)

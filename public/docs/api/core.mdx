@@ -1,0 +1,271 @@
+# Core API
+
+MCPC provides a simple yet powerful API for composing MCP servers. This guide covers the core concepts and API methods.
+
+## Configuration Format
+
+MCPC uses a JSON configuration format to define server composition:
+
+```json
+[
+  {
+    "name": "string",           // Tool name (required)
+    "description": "string",    // Tool description (required)
+    "deps": {                  // Dependencies configuration
+      "mcpServers": {
+        "server-name": {
+          "command": "string",   // Command to run
+          "args": ["string"],    // Command arguments
+          "env": {               // Environment variables
+            "KEY": "value"
+          }
+        }
+      }
+    }
+  }
+]
+```
+
+## Environment Variables
+
+### MCPC_CONFIG
+JSON string containing the server configuration. Required when running MCPC.
+
+```bash
+MCPC_CONFIG='[{"name":"tool","description":"desc","deps":{}}]'
+```
+
+### MCPC_LOG_LEVEL
+Set logging level. Options: `debug`, `info`, `warn`, `error`
+
+```bash
+MCPC_LOG_LEVEL=debug
+```
+
+### MCPC_TIMEOUT
+Timeout for tool calls in milliseconds (default: 30000)
+
+```bash
+MCPC_TIMEOUT=60000
+```
+
+## Server Dependencies
+
+The `deps` section defines which MCP servers your composed server depends on:
+
+### Standard MCP Server
+
+```json
+"deps": {
+  "mcpServers": {
+    "@modelcontextprotocol/server-filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/directory"],
+      "env": {
+        "OPTIONAL_ENV_VAR": "value"
+      }
+    }
+  }
+}
+```
+
+### Smithery Registry Server
+
+```json
+"deps": {
+  "mcpServers": {
+    "@smithery_ai/github": {
+      "command": "npx",
+      "args": ["-y", "@smithery_ai/github"],
+      "env": {
+        "GITHUB_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+### Custom Server
+
+```json
+"deps": {
+  "mcpServers": {
+    "my-custom-server": {
+      "command": "node",
+      "args": ["./my-server.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+## Tool Resolution
+
+MCPC automatically discovers and exposes tools from all configured MCP servers. Tools are called using the MCP protocol.
+
+### Available Tools
+
+List all available tools:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/list"
+}
+```
+
+### Call a Tool
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "filesystem_read_file",
+    "arguments": {
+      "path": "/path/to/file.txt"
+    }
+  }
+}
+```
+
+## Error Handling
+
+MCPC provides structured error responses following the JSON-RPC 2.0 specification:
+
+### Configuration Errors
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": null,
+  "error": {
+    "code": -32603,
+    "message": "Invalid configuration",
+    "data": {
+      "details": "Missing required field: name"
+    }
+  }
+}
+```
+
+### Tool Call Errors
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "error": {
+    "code": -32601,
+    "message": "Tool not found",
+    "data": {
+      "tool": "nonexistent_tool"
+    }
+  }
+}
+```
+
+### Server Connection Errors
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "error": {
+    "code": -32603,
+    "message": "Server connection failed",
+    "data": {
+      "server": "@smithery_ai/github",
+      "reason": "Process exited with code 1"
+    }
+  }
+}
+```
+
+## Advanced Features
+
+### Server Health Checks
+
+MCPC automatically monitors the health of connected servers:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "health/check"
+}
+```
+
+### Dynamic Server Management
+
+Add or remove servers at runtime (enterprise feature):
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "method": "servers/add",
+  "params": {
+    "name": "new-server",
+    "config": {
+      "command": "npx",
+      "args": ["-y", "@new/server"]
+    }
+  }
+}
+```
+
+### Tool Metadata
+
+Get detailed information about available tools:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "method": "tools/describe",
+  "params": {
+    "name": "filesystem_read_file"
+  }
+}
+```
+
+## Complete Example
+
+Here's a complete configuration for a multi-purpose development assistant:
+
+```json
+[
+  {
+    "name": "dev-assistant",
+    "description": "A comprehensive development assistant that can manage files, GitHub repositories, and execute commands",
+    "deps": {
+      "mcpServers": {
+        "@modelcontextprotocol/server-filesystem": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspace"],
+          "env": {}
+        },
+        "@smithery_ai/github": {
+          "command": "npx",
+          "args": ["-y", "@smithery_ai/github"],
+          "env": {
+            "GITHUB_TOKEN": "ghp_your_token_here"
+          }
+        },
+        "@wonderwhy_er/desktop_commander": {
+          "command": "npx",
+          "args": ["-y", "@wonderwhy_er/desktop_commander"],
+          "env": {
+            "ALLOWED_COMMANDS": "git,npm,yarn,node"
+          }
+        }
+      }
+    }
+  }
+]
+```

@@ -223,11 +223,43 @@ export default function Index() {
           <span className={title()}>Create Your </span>
           <span className={title({ color: "violet" })}>
             Agentic MCP Server
-          </span>{" "}
-          <span className={title()}>with a Single Prompt.</span>
+          </span>
+          <span className={title()}> with a Single Prompt.</span>
           <div className={subtitle({ class: "mt-4" })}>
             Powered by the composition of thousands of MCPs, Try it out below.
           </div>
+          
+          {/* Get Started Section */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6 mb-8">
+            <Button
+              as={Link}
+              href="/docs/quick-start"
+              color="primary"
+              size="lg"
+              className="min-w-[200px]"
+            >
+              Get Started
+            </Button>
+            <Button
+              as={Link}
+              href="/docs"
+              variant="bordered"
+              size="lg"
+              className="min-w-[200px]"
+            >
+              Documentation
+            </Button>
+            <Button
+              as={Link}
+              href="/docs/examples/basic"
+              variant="flat"
+              size="lg"
+              className="min-w-[200px]"
+            >
+              Examples
+            </Button>
+          </div>
+          
           <iframe
             className="w-full aspect-video border-0 rounded-lg"
             src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?rel=0&modestbranding=1`}
