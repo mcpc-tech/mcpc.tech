@@ -8,7 +8,7 @@ import { ServerListResponse } from "~/routes/smithery";
 import { PrimeReactProvider } from "primereact/api";
 import { JSONSchemaFaker } from "json-schema-faker";
 import { McpcConfigModal } from "../components/mcpc-config-modal";
-import { McpcMentionInput } from "../components/mcpc-mention-input";
+import { TiptapEditor } from "../components/tiptap-editor";
 
 const MCPC_SERVER_DEFAULT_NAME = "mcpc";
 const MCPC_TOOL_DEFAULT_NAME = "mcpc-agent";
@@ -259,10 +259,10 @@ export default function Index() {
             </Link>
           </div>
         </div>
-        <McpcMentionInput
+        <TiptapEditor
           servers={servers}
-          detailFetcher={detailFetcher}
           fetcher={fetcher}
+          detailFetcher={detailFetcher}
           onDepsChange={setServerDeps}
           onDescriptionChange={setResolvedValue}
         />
