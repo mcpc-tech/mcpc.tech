@@ -21,8 +21,12 @@ export const McpcMentionInput: React.FC<McpcMentionInputProps> = ({
 }) => {
   const [value, setValue] = useState("");
   const [resolvedValue, setResolvedValue] = useState("");
-  const [selectedServerNames, setSelectedServerNames] = useState(new Set<string>());
-  const [serverDeps, setServerDeps] = useState<ServerListResponse["servers"]>([]);
+  const [selectedServerNames, setSelectedServerNames] = useState(
+    new Set<string>()
+  );
+  const [serverDeps, setServerDeps] = useState<ServerListResponse["servers"]>(
+    []
+  );
   const textareaRef = useRef<HTMLInputElement>(null);
   const mentionRef = useRef<any>(null);
 
@@ -41,8 +45,11 @@ export const McpcMentionInput: React.FC<McpcMentionInputProps> = ({
   const renderSuggestion = (
     suggestion: SuggestionDataItem
   ): React.ReactNode => {
-    const mcpSuggestion = suggestion as unknown as ServerListResponse["servers"][number];
-    const rawTools = ((detailFetcher.data?.tools as ServerDetailResponse["tools"]) ?? []) as ServerDetailResponse["tools"];
+    const mcpSuggestion =
+      suggestion as unknown as ServerListResponse["servers"][number];
+    const rawTools = ((detailFetcher.data
+      ?.tools as ServerDetailResponse["tools"]) ??
+      []) as ServerDetailResponse["tools"];
     const tools =
       (rawTools?.length ?? 0) > 0
         ? rawTools
@@ -109,9 +116,7 @@ export const McpcMentionInput: React.FC<McpcMentionInputProps> = ({
       onChange={(e) => {
         const { value } = e.target as HTMLInputElement;
         setValue(value);
-        setResolvedValue(
-          value?.replaceAll(/>([^\s]+)/g, '<tool name="$1"/>')
-        );
+        setResolvedValue(value?.replaceAll(/>([^\s]+)/g, '<tool name="$1"/>'));
       }}
       onSearch={(e) => {
         fetcher.submit(
@@ -127,11 +132,11 @@ export const McpcMentionInput: React.FC<McpcMentionInputProps> = ({
         ...server,
         id: server.qualifiedName,
       }))}
-      placeholder="Type > to search and reference MCPs from Smithery as dependencies"
+      placeholder="Describe your agentic tool here... Type > to search and reference MCPs from Smithery as dependencies"
       itemTemplate={renderSuggestion}
-  inputClassName="w-full z-0 p-3 min-h-[72px]"
-  panelClassName="w-8/12 overflow-x-auto z-50 p-2 border-1 rounded-lg shadow-md bg-content1"
-  className="z-50"
+      inputClassName="w-full z-0 p-4 min-h-[150px]"
+      panelClassName="w-8/12 overflow-x-auto z-50 p-2 border-1 rounded-lg shadow-md bg-content1"
+      className="z-50"
     />
   );
 };

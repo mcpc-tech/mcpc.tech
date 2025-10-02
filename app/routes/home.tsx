@@ -10,8 +10,8 @@ import { JSONSchemaFaker } from "json-schema-faker";
 import { McpcConfigModal } from "../components/mcpc-config-modal";
 import { McpcMentionInput } from "../components/mcpc-mention-input";
 
-const MCPC_SERVER_DEFAULT_NAME = "mcpc-server-name-example";
-const MCPC_TOOL_DEFAULT_NAME = "mcpc-tool-name-example";
+const MCPC_SERVER_DEFAULT_NAME = "mcpc-server";
+const MCPC_TOOL_DEFAULT_NAME = "mcpc-agent";
 const YOUTUBE_VIDEO_ID = "7Z1H_y0QeRY";
 
 type McpcConfig = {
@@ -71,20 +71,26 @@ function buildMcpcConfig(params: {
   const { serverName, toolName, description, serverDeps } = params;
 
   const deps = safeBuildDepsConfig(serverDeps);
-  const configRaw = JSON.stringify([
-    {
-      name: toolName,
-      description,
-      deps,
-    },
-  ]);
+  const agentConfig = {
+    name: toolName,
+    description,
+    deps,
+  };
 
   return {
     mcpServers: {
       [serverName]: {
         command: "npx",
-        args: ["-y", "deno", "run", "--allow-all", "jsr:@mcpc/core/bin"],
-        env: { MCPC_CONFIG: configRaw },
+        args: [
+          "-y",
+          "@mcpc-tech/cli",
+          "--config",
+          JSON.stringify({
+            name: toolName,
+            version: "1.0.0",
+            agents: [agentConfig],
+          }),
+        ],
       },
     },
   };
@@ -96,25 +102,25 @@ export function HydrateFallback() {
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "MCP Compose - Create Agentic MCP Servers" },
+    { title: "MCPC - Build Agentic MCP Servers" },
     {
       name: "description",
       content:
-        "Create your agentic MCP server with a single prompt. Powered by the composition of thousands of MCPs.",
+        "The SDK for building agentic MCP (Model Context Protocol) Servers. Create powerful tools, fine-tune existing ones, and build multi-agent systems.",
     },
     {
       name: "keywords",
       content:
-        "MCP, MCP Compose, agentic servers, smithery.ai, server composition",
+        "MCP, MCPC, MCP Compose, agentic servers, Model Context Protocol, SDK, multi-agent systems",
     },
     {
       property: "og:title",
-      content: "MCP Compose - Create Agentic MCP Servers",
+      content: "MCPC - Build Agentic MCP Servers",
     },
     {
       property: "og:description",
       content:
-        "Create your agentic MCP server with a single prompt. Powered by the composition of thousands of MCPs.",
+        "The SDK for building agentic MCP (Model Context Protocol) Servers. Create powerful tools, fine-tune existing ones, and build multi-agent systems.",
     },
     { property: "og:type", content: "website" },
     { property: "og:url", content: "https://mcpc.tech" },
@@ -122,12 +128,12 @@ export const meta: MetaFunction = () => {
     { name: "twitter:card", content: "summary_large_image" },
     {
       name: "twitter:title",
-      content: "MCP Compose - Create Agentic MCP Servers",
+      content: "MCPC - Build Agentic MCP Servers",
     },
     {
       name: "twitter:description",
       content:
-        "Create your agentic MCP server with a single prompt. Powered by the composition of thousands of MCPs.",
+        "The SDK for building agentic MCP (Model Context Protocol) Servers. Create powerful tools, fine-tune existing ones, and build multi-agent systems.",
     },
     { name: "twitter:image", content: "https://mcpc.tech/og-image.png" }, // Same image as OG
     { name: "robots", content: "index, follow" },
@@ -220,35 +226,40 @@ export default function Index() {
     <IndexLayout>
       <section className="flex flex-col w-full md:w-8/12 lg:w-6/12 justify-center gap-4 py-8 md:py-10">
         <div className="inline-block max-w-7xl text-center justify-center">
-          <span className={title()}>Create Your </span>
-          <span className={title({ color: "violet" })}>
-            Agentic MCP Server
-          </span>{" "}
-          <span className={title()}>with a Single Prompt.</span>
+          <span className={title()}>Build </span>
+          <span className={title({ color: "violet" })}>Agentic MCP</span>{" "}
+          <span className={title()}>Servers</span>
           <div className={subtitle({ class: "mt-4" })}>
-            Powered by the composition of thousands of MCPs, Try it out below.
+            The SDK for building agentic MCP (Model Context Protocol) Servers.
+            Create powerful tools, fine-tune existing ones, and build
+            multi-agent systems.
           </div>
-          <iframe
-            className="w-full aspect-video border-0 rounded-lg"
-            src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?rel=0&modestbranding=1`}
-            title="YouTube video"
-            loading="lazy"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
-          <div className="mt-3 flex flex-col sm:flex-row items-center justify-center gap-2">
-            <span className="text-sm text-default-500">
-              Cannot sign in or play inside the page?
-            </span>
+          <div className="mt-6 mb-4 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              isExternal
+              href="https://github.com/mcpc-tech/mcpc/tree/main/docs"
+              title="View Documentation"
+            >
+              <Button color="primary" variant="flat" size="md">
+                📚 Documentation
+              </Button>
+            </Link>
             <Link
               isExternal
               href={`https://youtu.be/${YOUTUBE_VIDEO_ID}`}
-              title="Open on YouTube"
-              className="text-primary"
+              title="Watch on YouTube"
             >
-              <Button color="primary" variant="flat" size="sm">
-                Open on YouTube
+              <Button color="primary" variant="flat" size="md">
+                🎥 Watch Video Examples
+              </Button>
+            </Link>
+            <Link
+              isExternal
+              href="https://github.com/mcpc-tech/mcpc"
+              title="View on GitHub"
+            >
+              <Button color="default" variant="bordered" size="md">
+                ⭐ Star on GitHub
               </Button>
             </Link>
           </div>
