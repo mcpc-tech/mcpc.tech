@@ -2,7 +2,7 @@ import { Link } from "@heroui/link";
 import { useFetcher, type MetaFunction } from "react-router";
 import { subtitle, title } from "~/components/primitives";
 import { Navbar } from "~/components/navbar";
-import { Button, Divider, Spinner } from "@heroui/react";
+import { Button, Spinner } from "@heroui/react";
 import React, { useEffect, useState, useMemo } from "react";
 import { ServerListResponse } from "~/routes/smithery";
 import { PrimeReactProvider } from "primereact/api";
@@ -150,35 +150,7 @@ export function IndexLayout({ children }: React.PropsWithChildren<unknown>) {
         <PrimeReactProvider>{children}</PrimeReactProvider>
       </main>
       <footer className="w-full flex items-center justify-center py-3 gap-2">
-        <span className="text-default-600">Powered by</span>
-        <Link
-          isExternal
-          className="flex items-center gap-1 text-current"
-          href="https://heroui.com/docs/guide/introduction"
-          title="heroui.com homepage"
-        >
-          <p className="text-primary">HeroUI</p>
-        </Link>
-
-        <Divider orientation="vertical" />
-        <Link
-          isExternal
-          className="flex items-center gap-1 text-current"
-          href="https://primereact.org/"
-          title="https://primereact.org/ homepage"
-        >
-          <p className="text-primary">PrimeReact</p>
-        </Link>
-
-        <Divider orientation="vertical" />
-        <Link
-          isExternal
-          className="flex items-center gap-1 text-current"
-          href="https://smithery.ai"
-          title="smithery.ai homepage"
-        >
-          <p className="text-primary">smithery.ai</p>
-        </Link>
+        <span className="text-default-600">© 2025 MCPC. All rights reserved.</span>
       </footer>
     </div>
   );
@@ -249,7 +221,7 @@ export default function Index() {
               href={`https://youtu.be/${YOUTUBE_VIDEO_ID}`}
               title="Watch on YouTube"
             >
-              <Button color="primary" variant="flat" size="md">
+              <Button color="secondary" variant="flat" size="md">
                 🎥 Watch Video Examples
               </Button>
             </Link>
