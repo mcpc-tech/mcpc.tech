@@ -56,8 +56,10 @@ export interface LoaderData {
 // Loader function to fetch data from the Smithery Registry API
 export async function loader({
   request,
+  context,
 }: {
   request: Request;
+  context: { cloudflare: { env: { SMITHERY_API_TOKEN?: string } } };
 }): Promise<Response> {
   const url = new URL(request.url);
   const searchQuery = url.searchParams.get("q") || "";
@@ -65,7 +67,7 @@ export async function loader({
   console.log({ url, searchQuery, serverName });
 
   // Get API token from environment variable or server-side session
-  const apiToken = process.env.SMITHERY_API_TOKEN;
+  const apiToken = context.cloudflare.env.SMITHERY_API_TOKEN;
 
   if (!apiToken) {
     return new Response(JSON.stringify({ error: "API token not configured" }), {
@@ -102,11 +104,11 @@ export async function loader({
       // Fetch server list with optional search query
       const queryParams = new URLSearchParams();
       if (searchQuery) {
-        queryParams.set("q", searchQuery);
+        queryParams.set("q", `${searchQuery}`);
       }
-
+      console.log(`https://registry.smithery.ai/servers?${queryParams.toString()}`);
       const response = await fetch(
-        `https://registry.smithery.ai/servers?${queryParams}`,
+        `https://registry.smithery.ai/servers?${queryParams.toString()}`,
         {
           headers,
         }

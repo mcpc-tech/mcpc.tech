@@ -66,7 +66,7 @@ const ToolSelector = ({
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     if (value) {
-      fetcher.submit({ search: value }, { action: "/smithery", method: "GET" });
+      fetcher.submit({ q: value }, { action: "/smithery", method: "GET" });
     }
   };
 
