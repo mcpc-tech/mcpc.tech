@@ -57,7 +57,7 @@ export const McpcMentionInput: React.FC<McpcMentionInputProps> = ({
             {
               name: "__ALL__",
               description:
-                "No tools registered - you can select this placeholder for now and modify it later",
+                "No tools registered - you can select all for now and modify it later",
             },
           ] as unknown as ServerDetailResponse["tools"]);
     return (

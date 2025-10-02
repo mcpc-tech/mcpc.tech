@@ -64,7 +64,6 @@ export async function loader({
   const url = new URL(request.url);
   const searchQuery = url.searchParams.get("q") || "";
   const serverName = url.searchParams.get("server");
-  console.log({ url, searchQuery, serverName });
 
   // Get API token from environment variable or server-side session
   const apiToken = context.cloudflare.env.SMITHERY_API_TOKEN;
@@ -106,7 +105,6 @@ export async function loader({
       if (searchQuery) {
         queryParams.set("q", `${searchQuery}`);
       }
-      console.log(`https://registry.smithery.ai/servers?${queryParams.toString()}`);
       const response = await fetch(
         `https://registry.smithery.ai/servers?${queryParams.toString()}`,
         {

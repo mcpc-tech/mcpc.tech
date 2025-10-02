@@ -76,12 +76,14 @@ const ToolSelector = ({
     }
   }, [detailFetcher.data]);
 
-  const tools = detailFetcher.data?.tools || [
-    {
-      name: "__ALL__",
-      description: "No tools available - select this placeholder for now",
-    },
-  ];
+  const tools = detailFetcher.data?.tools && detailFetcher.data.tools.length > 0
+    ? detailFetcher.data.tools
+    : [
+        {
+          name: "__ALL__",
+          description: "No tools available - select this placeholder for now",
+        },
+      ];
 
   if (!isOpen) return null;
 

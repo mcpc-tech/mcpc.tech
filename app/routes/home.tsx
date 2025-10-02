@@ -163,13 +163,13 @@ export const meta: MetaFunction = () => {
 
 export function IndexLayout({ children }: React.PropsWithChildren<unknown>) {
   return (
-    <div className="relative flex flex-col h-screen">
+    <div className="relative flex flex-col min-h-screen">
       <Navbar />
-      <main className="container mx-auto max-w-[95%] md:max-w-[90%] lg:max-w-8xl pt-16 px-6 flex-grow flex items-center justify-center">
+      <main className="container mx-auto max-w-[95%] md:max-w-[90%] lg:max-w-8xl py-4 px-6 flex-grow flex items-center justify-center">
         <PrimeReactProvider>{children}</PrimeReactProvider>
       </main>
-      <footer className="w-full flex items-center justify-center py-3 gap-2">
-        <span className="text-default-600">© 2025 MCPC. All rights reserved.</span>
+      <footer className="w-full flex items-center justify-center py-2">
+        <span className="text-xs text-default-400">© 2025 MCPC. All rights reserved.</span>
       </footer>
     </div>
   );
@@ -215,27 +215,25 @@ export default function Index() {
     }
   }, [fetcher]);
 
-  // Avoid mutating fetcher data; consumers should handle empty tools gracefully.
-
   return (
     <IndexLayout>
-      <section className="flex flex-col w-full md:w-8/12 lg:w-6/12 justify-center gap-4 py-8 md:py-10">
+      <section className="flex flex-col w-full md:w-8/12 lg:w-6/12 justify-center gap-8 py-4">
         <div className="inline-block max-w-7xl text-center justify-center">
           <span className={title()}>Build </span>
           <span className={title({ color: "violet" })}>Agentic MCP</span>{" "}
           <span className={title()}>Servers</span>
-          <div className={subtitle({ class: "mt-4" })}>
+          <div className={subtitle({ class: "mt-8" })}>
             The SDK for building agentic MCP (Model Context Protocol) Servers.
             Create powerful tools, fine-tune existing ones, and build
             multi-agent systems.
           </div>
-          <div className="mt-6 mb-4 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-4 mb-3 flex flex-wrap items-center justify-center gap-2">
             <Link
               isExternal
               href="https://github.com/mcpc-tech/mcpc/tree/main/docs"
               title="View Documentation"
             >
-              <Button color="primary" variant="flat" size="md">
+              <Button color="primary" variant="flat" size="sm">
                 📚 Documentation
               </Button>
             </Link>
@@ -244,7 +242,7 @@ export default function Index() {
               href={`https://youtu.be/${YOUTUBE_VIDEO_ID}`}
               title="Watch on YouTube"
             >
-              <Button color="secondary" variant="flat" size="md">
+              <Button color="secondary" variant="flat" size="sm">
                 🎥 Watch Video Examples
               </Button>
             </Link>
@@ -253,12 +251,19 @@ export default function Index() {
               href="https://github.com/mcpc-tech/mcpc"
               title="View on GitHub"
             >
-              <Button color="default" variant="bordered" size="md">
+              <Button color="default" variant="bordered" size="sm">
                 ⭐ Star on GitHub
               </Button>
             </Link>
           </div>
         </div>
+        
+        <div className="text-center mb-2">
+          <p className="text-sm text-default-500">
+            ✨ Quick Demo: Try describing your tool below and reference MCP dependencies with <code className="text-primary">@</code>
+          </p>
+        </div>
+        
         <TiptapEditor
           servers={servers}
           fetcher={fetcher}
@@ -267,7 +272,7 @@ export default function Index() {
           onDescriptionChange={setResolvedValue}
         />
         <Button
-          className="mt-8"
+          className="mt-4"
           onPress={handleSubmit}
           color="primary"
           variant="bordered"
