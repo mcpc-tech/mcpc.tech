@@ -10,7 +10,7 @@ import { JSONSchemaFaker } from "json-schema-faker";
 import { McpcConfigModal } from "../components/mcpc-config-modal";
 import { McpcMentionInput } from "../components/mcpc-mention-input";
 
-const MCPC_SERVER_DEFAULT_NAME = "mcpc-server";
+const MCPC_SERVER_DEFAULT_NAME = "mcpc";
 const MCPC_TOOL_DEFAULT_NAME = "mcpc-agent";
 const YOUTUBE_VIDEO_ID = "7Z1H_y0QeRY";
 
@@ -67,14 +67,37 @@ function buildMcpcConfig(params: {
   toolName: string;
   description: string;
   serverDeps: ServerListResponse["servers"];
+  mode: "agentic" | "agentic-workflow";
+  enableSampling: boolean;
 }): McpcConfig {
-  const { serverName, toolName, description, serverDeps } = params;
+  const { serverName, toolName, description, serverDeps, mode, enableSampling } = params;
 
   const deps = safeBuildDepsConfig(serverDeps);
-  const agentConfig = {
+  const agentConfig: any = {
     name: toolName,
     description,
     deps,
+  };
+
+  // Add options for mode and sampling
+  const options: any = {};
+  if (mode !== "agentic") {
+    options.mode = mode;
+  }
+  if (enableSampling) {
+    options.sampling = true;
+  }
+  
+  // Only add options if there are any
+  if (Object.keys(options).length > 0) {
+    agentConfig.options = options;
+  }
+
+  // Build the config object
+  const config: any = {
+    name: toolName,
+    version: "1.0.0",
+    agents: [agentConfig],
   };
 
   return {
@@ -83,13 +106,9 @@ function buildMcpcConfig(params: {
         command: "npx",
         args: [
           "-y",
-          "@mcpc-tech/cli",
+          "@mcpc-tech/cli@beta",
           "--config",
-          JSON.stringify({
-            name: toolName,
-            version: "1.0.0",
-            agents: [agentConfig],
-          }),
+          JSON.stringify(config),
         ],
       },
     },
@@ -165,6 +184,8 @@ export default function Index() {
   const [isShowResult, setIsShowResult] = useState(false);
   const [serverName, setServerName] = useState(MCPC_SERVER_DEFAULT_NAME);
   const [toolName, setToolName] = useState(MCPC_TOOL_DEFAULT_NAME);
+  const [mode, setMode] = useState<"agentic" | "agentic-workflow">("agentic");
+  const [enableSampling, setEnableSampling] = useState(false);
   const [serverDeps, setServerDeps] = useState<ServerListResponse["servers"]>(
     []
   );
@@ -176,8 +197,10 @@ export default function Index() {
         toolName,
         description: resolvedValue,
         serverDeps,
+        mode,
+        enableSampling,
       }),
-    [serverName, toolName, resolvedValue, serverDeps]
+    [serverName, toolName, resolvedValue, serverDeps, mode, enableSampling]
   );
   const mcpcConfigStr = useMemo(
     () => JSON.stringify(mcpcConfig, null, 2),
@@ -259,6 +282,10 @@ export default function Index() {
         setServerName={setServerName}
         toolName={toolName}
         setToolName={setToolName}
+        mode={mode}
+        setMode={setMode}
+        enableSampling={enableSampling}
+        setEnableSampling={setEnableSampling}
         mcpcConfigStr={mcpcConfigStr}
         mcpcConfig={mcpcConfig}
         MCPC_SERVER_DEFAULT_NAME={MCPC_SERVER_DEFAULT_NAME}

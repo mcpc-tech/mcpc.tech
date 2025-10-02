@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Button } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Button, Select, SelectItem, Switch } from "@heroui/react";
 import { CodeBlock } from "~/components/code";
 
 interface McpcConfigModalProps {
@@ -9,6 +9,10 @@ interface McpcConfigModalProps {
   setServerName: (name: string) => void;
   toolName: string;
   setToolName: (name: string) => void;
+  mode: "agentic" | "agentic-workflow";
+  setMode: (mode: "agentic" | "agentic-workflow") => void;
+  enableSampling: boolean;
+  setEnableSampling: (enable: boolean) => void;
   mcpcConfigStr: string;
   mcpcConfig: any;
   MCPC_SERVER_DEFAULT_NAME: string;
@@ -22,6 +26,10 @@ export const McpcConfigModal: React.FC<McpcConfigModalProps> = ({
   setServerName,
   toolName,
   setToolName,
+  mode,
+  setMode,
+  enableSampling,
+  setEnableSampling,
   mcpcConfigStr,
   mcpcConfig,
   MCPC_SERVER_DEFAULT_NAME,
@@ -75,6 +83,31 @@ export const McpcConfigModal: React.FC<McpcConfigModalProps> = ({
                   onChange={(e) => setToolName(e.target.value)}
                   onClear={() => setToolName(MCPC_TOOL_DEFAULT_NAME)}
                 />
+              </div>
+              <div className="flex gap-4 mb-4">
+                <div className="flex-1">
+                  <Select
+                    label="Mode"
+                    placeholder="Select mode"
+                    selectedKeys={[mode]}
+                    onChange={(e) => setMode(e.target.value as "agentic" | "agentic-workflow")}
+                  >
+                    <SelectItem key="agentic">
+                      Agentic (Standard)
+                    </SelectItem>
+                    <SelectItem key="agentic-workflow">
+                      Agentic-Workflow
+                    </SelectItem>
+                  </Select>
+                </div>
+                <div className="flex-1 flex">
+                  <Switch
+                    isSelected={enableSampling}
+                    onValueChange={setEnableSampling}
+                  >
+                    Enable Sampling Capability
+                  </Switch>
+                </div>
               </div>
               <CodeBlock code={mcpcConfigStr} language="json" />
             </ModalBody>
