@@ -3,7 +3,8 @@ export type SiteConfig = typeof siteConfig;
 export const siteConfig = {
   name: "MCP Compose",
   description: "MCP Compose",
-  navItems: [],
+  navItems: [] as { label: string; href: string }[],
+  mainNav: [] as { label: string; href: string }[],
   navMenuItems: [
     {
       label: "Profile",
