@@ -161,11 +161,16 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export function IndexLayout({ children }: React.PropsWithChildren<unknown>) {
+export function IndexLayout(
+  { children, pageTitle }: React.PropsWithChildren<{ pageTitle: string }>
+) {
   return (
     <div className="relative flex flex-col min-h-screen">
       <Navbar />
-      <main className="container mx-auto max-w-[95%] md:max-w-[90%] lg:max-w-8xl py-4 px-6 flex-grow flex items-center justify-center">
+      <main
+        className="container mx-auto max-w-[95%] md:max-w-[90%] lg:max-w-8xl py-4 px-6 flex-grow flex items-center justify-center"
+        aria-label={pageTitle}
+      >
         <PrimeReactProvider>{children}</PrimeReactProvider>
       </main>
       <footer className="w-full flex items-center justify-center py-2">
