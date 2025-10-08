@@ -12,7 +12,6 @@ import { TiptapEditor } from "../components/tiptap-editor";
 
 const MCPC_SERVER_DEFAULT_NAME = "mcpc";
 const MCPC_TOOL_DEFAULT_NAME = "mcpc-agent";
-const YOUTUBE_VIDEO_ID = "7Z1H_y0QeRY";
 
 type McpcConfig = {
   mcpServers: Record<
@@ -106,7 +105,7 @@ function buildMcpcConfig(params: {
         command: "npx",
         args: [
           "-y",
-          "@mcpc-tech/cli@beta",
+          "@mcpc-tech/cli",
           "--config",
           JSON.stringify(config),
         ],
@@ -162,7 +161,7 @@ export const meta: MetaFunction = () => {
 };
 
 export function IndexLayout(
-  { children, pageTitle }: React.PropsWithChildren<{ pageTitle: string }>
+  { children, pageTitle = "MCPC" }: React.PropsWithChildren<{ pageTitle?: string }>
 ) {
   return (
     <div className="relative flex flex-col min-h-screen">
@@ -221,7 +220,7 @@ export default function Index() {
   }, [fetcher]);
 
   return (
-    <IndexLayout>
+    <IndexLayout pageTitle="MCPC - Build Agentic MCP Servers">
       <section className="flex flex-col w-full md:w-8/12 lg:w-6/12 justify-center gap-8 py-4">
         <div className="inline-block max-w-7xl text-center justify-center">
           <span className={title()}>Build </span>
@@ -244,7 +243,7 @@ export default function Index() {
             </Link>
             <Link
               isExternal
-              href={`https://youtu.be/${YOUTUBE_VIDEO_ID}`}
+              href={`https://www.youtube.com/watch?v=p21YdFGGQcw&list=PLWenI1XMQwrgybXjzg7TLvtwMHcVdyQU4`}
               title="Watch on YouTube"
             >
               <Button color="secondary" variant="flat" size="sm">
