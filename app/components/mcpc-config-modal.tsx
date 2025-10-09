@@ -266,7 +266,7 @@ export const McpcConfigModal: React.FC<McpcConfigModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} size={"full"} onClose={onClose}>
+    <Modal isOpen={isOpen} size={"full"} onClose={onClose} scrollBehavior="inside">
       <ModalContent>
         {(close) => (
           <>
