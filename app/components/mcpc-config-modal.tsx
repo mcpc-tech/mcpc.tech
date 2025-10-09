@@ -343,6 +343,16 @@ export const McpcConfigModal: React.FC<McpcConfigModalProps> = ({
                       <p className="text-xs text-default-500 mb-3">
                         🔒 Your API key is not stored on our servers. It will be included in the configuration you copy below for local use only.
                       </p>
+                      <p className="text-xs text-warning-600 mb-3 font-medium">
+                        ⚠️ Before using: Please make sure you have connected your apps (e.g., GitHub, Notion) on{" "}
+                        <Link 
+                          href="https://smithery.ai" 
+                          isExternal 
+                          className="text-xs font-medium underline"
+                        >
+                          Smithery
+                        </Link>
+                      </p>
                       <Input
                         label="Smithery API Key"
                         placeholder="Enter your Smithery API key"
