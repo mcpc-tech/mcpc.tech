@@ -129,8 +129,9 @@ export const meta: MetaFunction = () => {
     {
       name: "keywords",
       content:
-        "MCP, MCPC, MCP Compose, agentic servers, Model Context Protocol, SDK, multi-agent systems",
+        "MCP, MCPC, MCP Compose, agentic servers, Model Context Protocol, SDK, multi-agent systems, AI tools, LLM, machine learning, developer tools",
     },
+    { tagName: "link", rel: "canonical", href: "https://mcpc.tech" },
     {
       property: "og:title",
       content: "MCPC - Build Agentic MCP Servers",
@@ -142,7 +143,11 @@ export const meta: MetaFunction = () => {
     },
     { property: "og:type", content: "website" },
     { property: "og:url", content: "https://mcpc.tech" },
-    { property: "og:image", content: "https://mcpc.tech/og-image.png" }, // You'll need to create this image
+    { property: "og:image", content: "https://mcpc.tech/og-image.png" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { property: "og:site_name", content: "MCPC" },
+    { property: "og:locale", content: "en_US" },
     { name: "twitter:card", content: "summary_large_image" },
     {
       name: "twitter:title",
@@ -153,24 +158,59 @@ export const meta: MetaFunction = () => {
       content:
         "The SDK for building agentic MCP (Model Context Protocol) Servers. Create powerful tools, fine-tune existing ones, and build multi-agent systems.",
     },
-    { name: "twitter:image", content: "https://mcpc.tech/og-image.png" }, // Same image as OG
-    { name: "robots", content: "index, follow" },
+    { name: "twitter:image", content: "https://mcpc.tech/og-image.png" },
+    { name: "twitter:site", content: "@mcpctech" },
+    { name: "twitter:creator", content: "@mcpctech" },
+    { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
+    { name: "googlebot", content: "index, follow" },
+    { name: "author", content: "MCPC" },
     { name: "viewport", content: "width=device-width, initial-scale=1" },
     { charSet: "utf-8" },
   ];
 };
 
 export function IndexLayout({ children }: React.PropsWithChildren<unknown>) {
+  // Structured data for better SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "MCPC",
+    "applicationCategory": "DeveloperApplication",
+    "description": "The SDK for building agentic MCP (Model Context Protocol) Servers. Create powerful tools, fine-tune existing ones, and build multi-agent systems.",
+    "url": "https://mcpc.tech",
+    "operatingSystem": "Cross-platform",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "MCPC",
+      "url": "https://github.com/mcpc-tech"
+    },
+    "sameAs": [
+      "https://github.com/mcpc-tech/mcpc",
+      "https://x.com/mcpctech"
+    ]
+  };
+
   return (
-    <div className="relative flex flex-col min-h-screen">
-      <Navbar />
-      <main className="container mx-auto max-w-[95%] md:max-w-[90%] lg:max-w-8xl py-4 px-6 flex-grow flex items-center justify-center">
-        <PrimeReactProvider>{children}</PrimeReactProvider>
-      </main>
-      <footer className="w-full flex items-center justify-center py-2">
-        <span className="text-xs text-default-400">© 2025 MCPC. All rights reserved.</span>
-      </footer>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <div className="relative flex flex-col min-h-screen">
+        <Navbar />
+        <main className="container mx-auto max-w-[95%] md:max-w-[90%] lg:max-w-8xl py-4 px-6 flex-grow flex items-center justify-center">
+          <PrimeReactProvider>{children}</PrimeReactProvider>
+        </main>
+        <footer className="w-full flex items-center justify-center py-2">
+          <span className="text-xs text-default-400">© 2025 MCPC. All rights reserved.</span>
+        </footer>
+      </div>
+    </>
   );
 }
 
