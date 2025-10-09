@@ -60,6 +60,47 @@ export const McpcMentionInput: React.FC<McpcMentionInputProps> = ({
                 "No tools registered - you can select all for now and modify it later",
             },
           ] as unknown as ServerDetailResponse["tools"]);
+
+    const renderProtocolBadges = () => {
+      console.log("mcpSuggestion.supportedProtocols:", {
+        mcpSuggestion,
+        servers,
+      });
+      if (
+        !mcpSuggestion.supportedProtocols ||
+        mcpSuggestion.supportedProtocols.length === 0
+      ) {
+        return null;
+      }
+
+      const colors: Record<string, string> = {
+        http: "bg-blue-100 text-blue-700",
+        stdio: "bg-green-100 text-green-700",
+        ws: "bg-purple-100 text-purple-700",
+      };
+
+      const labels: Record<string, string> = {
+        http: "http (smithery)",
+        stdio: "stdio",
+        ws: "ws",
+      };
+
+      return (
+        <div className="inline-flex gap-1 ml-2">
+          {mcpSuggestion.supportedProtocols.map((protocol) => (
+            <span
+              key={protocol}
+              className={`text-xs px-2 py-0.5 rounded ${
+                colors[protocol] || "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {labels[protocol] || protocol}
+            </span>
+          ))}
+        </div>
+      );
+    };
+
     return (
       <Accordion
         className="rounded-none m-1"
@@ -77,7 +118,12 @@ export const McpcMentionInput: React.FC<McpcMentionInputProps> = ({
           key={mcpSuggestion.qualifiedName}
           aria-label={mcpSuggestion.qualifiedName}
           subtitle={mcpSuggestion.description}
-          title={mcpSuggestion.qualifiedName}
+          title={
+            <div className="flex items-center flex-wrap">
+              <span>{mcpSuggestion.qualifiedName}</span>
+              {renderProtocolBadges()}
+            </div>
+          }
           className="rounded-lg w-full whitespace-normal"
         >
           {tools && (

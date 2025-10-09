@@ -4,13 +4,14 @@ export interface ServerListResponse {
     // Extended info
     resolvedToolDef?: string;
     detail?: ServerDetailResponse;
+    supportedProtocols?: Array<"http" | "stdio">;
 
     qualifiedName: string;
     displayName: string;
     description: string;
     homepage: string;
     useCount: string;
-    isDeployed: boolean;
+    remote: boolean;
     createdAt: string;
   }>;
   pagination: {
@@ -98,7 +99,8 @@ export async function loader({
         );
       }
 
-      return response.json();
+      const data = await response.json();
+      return Response.json(data);
     } else {
       // Fetch server list with optional search query
       const queryParams = new URLSearchParams();
@@ -116,7 +118,20 @@ export async function loader({
         throw new Error(`Failed to fetch server list: ${response.statusText}`);
       }
 
-      return response.json();
+      const data: ServerListResponse = await response.json();
+      
+      // Add supportedProtocols based on isDeployed flag
+      // Deployed servers typically support HTTP, others support stdio
+      if (data.servers) {
+        data.servers = data.servers.map(server => ({
+          ...server,
+          supportedProtocols: server.remote 
+            ? ["http" as const] 
+            : ["stdio" as const]
+        }));
+      }
+
+      return Response.json(data);
     }
   } catch (error) {
     console.error("API request failed:", error);

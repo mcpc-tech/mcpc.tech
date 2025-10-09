@@ -6,7 +6,6 @@ import { Button, Spinner } from "@heroui/react";
 import React, { useEffect, useState, useMemo } from "react";
 import { ServerListResponse } from "~/routes/smithery";
 import { PrimeReactProvider } from "primereact/api";
-import { JSONSchemaFaker } from "json-schema-faker";
 import { McpcConfigModal } from "../components/mcpc-config-modal";
 import { TiptapEditor } from "../components/tiptap-editor";
 
@@ -20,47 +19,126 @@ type McpcConfig = {
   >;
 };
 
-function safeBuildDepsConfig(serverDeps: ServerListResponse["servers"]) {
-  const depsConfig: { mcpServers: Record<string, unknown> } = {
-    mcpServers: {},
-  };
+type ConnectionType = "stdio" | "http";
 
-  serverDeps.forEach(({ detail, qualifiedName }) => {
-    const stdio = detail?.connections.find((v) => v.type === "stdio");
-    const remote = detail?.connections.find((v) => v.type === "http");
+type ConfigSchema = {
+  type: ConnectionType;
+  schema: any;
+  exampleConfig?: any;
+};
 
-    if (stdio) {
-      // stdioFunction is a stringified function. Evaluate cautiously.
-      try {
-        // eslint-disable-next-line no-eval
-        const fn = eval(stdio.stdioFunction ?? "");
-        if (typeof fn === "function") {
-          depsConfig.mcpServers[qualifiedName] = fn(stdio.exampleConfig ?? {});
-        }
-      } catch {
-        // Ignore invalid stdioFunction
-      }
-      return;
+// Build stdio server configuration
+function buildStdioConfig(connection: any, userConfig: any) {
+  try {
+    const fn = eval(connection.stdioFunction ?? "");
+    if (typeof fn === "function") {
+      const config = userConfig || connection.exampleConfig || {};
+      return fn(config);
     }
-
-    if (remote) {
-      // Clone to avoid mutating original data
-      const remoteCopy: any = { ...remote };
-      try {
-        remoteCopy.config = JSONSchemaFaker.generate(
-          remoteCopy.configSchema ?? ({} as any)
-        );
-      } catch {
-        remoteCopy.config = {};
-      }
-      delete remoteCopy.configSchema;
-      depsConfig.mcpServers[qualifiedName] = { smitheryConfig: remoteCopy };
-    }
-  });
-
-  return depsConfig;
+  } catch {
+    // Invalid stdio function, skip this server
+  }
+  return null;
 }
 
+// Build HTTP server configuration
+function buildHttpConfig(connection: any, userConfig: any, globalSmitheryApiKey?: string) {
+  const { smitheryApiKey, ...otherConfig } = userConfig || {};
+  
+  const smitheryConfig: any = {
+    ...connection,
+    config: otherConfig,
+  };
+  
+  delete smitheryConfig.configSchema;
+  
+  // Use global API key or server-specific one
+  const apiKey = globalSmitheryApiKey || smitheryApiKey;
+  if (apiKey) {
+    smitheryConfig.smitheryApiKey = apiKey;
+  }
+  
+  return { smitheryConfig };
+}
+
+// Build dependency configurations from server list
+function buildDepsConfig(
+  serverDeps: ServerListResponse["servers"],
+  userConfigs: Record<string, any>
+) {
+  const mcpServers: Record<string, unknown> = {};
+  
+  // Extract global smitheryApiKey if it exists
+  const globalSmitheryApiKey = userConfigs._global?.smitheryApiKey;
+
+  for (const server of serverDeps) {
+    const { detail, qualifiedName } = server;
+    const userConfig = userConfigs[qualifiedName];
+    
+    const stdio = detail?.connections.find((c) => c.type === "stdio");
+    const http = detail?.connections.find((c) => c.type === "http");
+
+    if (stdio) {
+      const config = buildStdioConfig(stdio, userConfig);
+      if (config) {
+        mcpServers[qualifiedName] = config;
+      }
+      continue;
+    }
+
+    if (http) {
+      mcpServers[qualifiedName] = buildHttpConfig(http, userConfig, globalSmitheryApiKey);
+    }
+  }
+
+  return { mcpServers };
+}
+
+// Extract configuration schemas from server dependencies
+function extractConfigSchemas(serverDeps: ServerListResponse["servers"]) {
+  const schemas: Record<string, ConfigSchema> = {};
+  
+  for (const server of serverDeps) {
+    const { detail, qualifiedName } = server;
+    
+    const stdio = detail?.connections.find((c) => c.type === "stdio");
+    const http = detail?.connections.find((c) => c.type === "http");
+
+    if (stdio?.configSchema) {
+      schemas[qualifiedName] = {
+        type: "stdio",
+        schema: stdio.configSchema,
+        exampleConfig: stdio.exampleConfig,
+      };
+    }
+
+    if (http?.configSchema) {
+      schemas[qualifiedName] = {
+        type: "http",
+        schema: http.configSchema,
+      };
+    }
+  }
+
+  return schemas;
+}
+
+// Build agent options
+function buildAgentOptions(mode: string, enableSampling: boolean) {
+  const options: any = {};
+  
+  if (mode !== "agentic") {
+    options.mode = mode;
+  }
+  
+  if (enableSampling) {
+    options.sampling = true;
+  }
+  
+  return Object.keys(options).length > 0 ? options : null;
+}
+
+// Build complete MCPC configuration
 function buildMcpcConfig(params: {
   serverName: string;
   toolName: string;
@@ -68,32 +146,24 @@ function buildMcpcConfig(params: {
   serverDeps: ServerListResponse["servers"];
   mode: "agentic" | "agentic-workflow";
   enableSampling: boolean;
+  userConfigs: Record<string, any>;
 }): McpcConfig {
-  const { serverName, toolName, description, serverDeps, mode, enableSampling } = params;
+  const { serverName, toolName, description, serverDeps, mode, enableSampling, userConfigs } = params;
 
-  const deps = safeBuildDepsConfig(serverDeps);
+  const deps = buildDepsConfig(serverDeps, userConfigs);
+  
   const agentConfig: any = {
     name: toolName,
     description,
     deps,
   };
 
-  // Add options for mode and sampling
-  const options: any = {};
-  if (mode !== "agentic") {
-    options.mode = mode;
-  }
-  if (enableSampling) {
-    options.sampling = true;
-  }
-  
-  // Only add options if there are any
-  if (Object.keys(options).length > 0) {
+  const options = buildAgentOptions(mode, enableSampling);
+  if (options) {
     agentConfig.options = options;
   }
 
-  // Build the config object
-  const config: any = {
+  const config = {
     name: toolName,
     version: "1.0.0",
     agents: [agentConfig],
@@ -103,12 +173,7 @@ function buildMcpcConfig(params: {
     mcpServers: {
       [serverName]: {
         command: "npx",
-        args: [
-          "-y",
-          "@mcpc-tech/cli",
-          "--config",
-          JSON.stringify(config),
-        ],
+        args: ["-y", "@mcpc-tech/cli", "--config", JSON.stringify(config)],
       },
     },
   };
@@ -229,6 +294,13 @@ export default function Index() {
     []
   );
   const [resolvedValue, setResolvedValue] = useState("");
+  const [userConfigs, setUserConfigs] = useState<Record<string, any>>({});
+  
+  const configSchemas = useMemo(
+    () => extractConfigSchemas(serverDeps),
+    [serverDeps]
+  );
+  
   const mcpcConfig = useMemo(
     () =>
       buildMcpcConfig({
@@ -238,8 +310,9 @@ export default function Index() {
         serverDeps,
         mode,
         enableSampling,
+        userConfigs,
       }),
-    [serverName, toolName, resolvedValue, serverDeps, mode, enableSampling]
+    [serverName, toolName, resolvedValue, serverDeps, mode, enableSampling, userConfigs]
   );
   const mcpcConfigStr = useMemo(
     () => JSON.stringify(mcpcConfig, null, 2),
@@ -334,6 +407,10 @@ export default function Index() {
         mcpcConfig={mcpcConfig}
         MCPC_SERVER_DEFAULT_NAME={MCPC_SERVER_DEFAULT_NAME}
         MCPC_TOOL_DEFAULT_NAME={MCPC_TOOL_DEFAULT_NAME}
+        configSchemas={configSchemas}
+        userConfigs={userConfigs}
+        setUserConfigs={setUserConfigs}
+        serverDeps={serverDeps}
       />
     </IndexLayout>
   );

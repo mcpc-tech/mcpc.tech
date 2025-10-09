@@ -49,6 +49,24 @@ const ToolSelector = ({
   const [isLoadingTools, setIsLoadingTools] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const renderProtocolBadge = (protocol: string) => {
+    const colors: Record<string, string> = {
+      http: "bg-blue-100 text-blue-700",
+      stdio: "bg-green-100 text-green-700",
+    };
+    
+    const labels: Record<string, string> = {
+      http: "http (smithery)",
+      stdio: "stdio",
+    };
+
+    return (
+      <span className={`text-xs px-2 py-0.5 rounded ${colors[protocol] || "bg-gray-100 text-gray-700"}`}>
+        {labels[protocol] || protocol}
+      </span>
+    );
+  };
+
   const handleServerClick = (serverName: string) => {
     setSelectedServer(serverName);
     setIsLoadingTools(true);
@@ -134,8 +152,17 @@ const ToolSelector = ({
                     onClick={() => handleServerClick(server.qualifiedName)}
                   >
                     <div className="text-left w-full">
-                      <div className="font-semibold">
-                        {server.qualifiedName}
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold">
+                          {server.qualifiedName}
+                        </span>
+                        {server.supportedProtocols && server.supportedProtocols.length > 0 && (
+                          <div className="flex gap-1">
+                            {server.supportedProtocols.map((protocol) => 
+                              renderProtocolBadge(protocol)
+                            )}
+                          </div>
+                        )}
                       </div>
                       {server.description && (
                         <div className="text-xs text-default-500 mt-1">
